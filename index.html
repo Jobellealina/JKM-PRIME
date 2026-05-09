@@ -11,7 +11,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -825,7 +824,6 @@ document.getElementById(this.dataset.section).classList.add('active');
 WEEKLY CRUD
 ======================= */
 
-let weeklyEditIndex = -1;
 
 function addWeeklyReport() {
   const period = weekPeriod.value;
@@ -906,7 +904,6 @@ Swal.fire('Deleted!','','success');
 EXPENSE CRUD
 ======================= */
 
-let expenseEditIndex = -1;
 
 function addExpense() {
   const expense = {
@@ -989,8 +986,6 @@ Swal.fire('Deleted!','','success');
 let weeklyReports = [];
 let expenses = [];
 let inventory = [];
-let receipts = [];
-let quotationItems = [];
 /* =======================
 INVENTORY CRUD
 ======================= */
@@ -1139,15 +1134,6 @@ document.addEventListener("DOMContentLoaded", () => {
 SAVE
 ======================= */
 
-function saveData(){
-
-localStorage.setItem('weeklyReports',JSON.stringify(weeklyReports));
-
-localStorage.setItem('expenses',JSON.stringify(expenses));
-
-localStorage.setItem('inventory',JSON.stringify(inventory));
-
-}
 
 /* =======================
 EXPORT
@@ -1177,7 +1163,6 @@ link.click();
 Swal.fire('Exported','Backup downloaded','success');
 
 }
-let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
 let receiptItems = [];
 receiptItems = [];
 
@@ -1200,27 +1185,6 @@ function addReceiptItem() {
   rQty.value = "";
   rPrice.value = "";
 }
-
-function generateReceipt() {
-  const name = rName.value;
-  const address = rAddress.value;
-
-  if (!name) return Swal.fire("Error", "Enter name", "error");
-
-  const receipt = {
-    name,
-    address,
-    date: new Date().toLocaleString(),
-    receiptNo: "JKM" + Date.now(),
-    items: receiptItems
-  };
-
-  db.ref("receipts").push(receipt);
-
-  receiptItems = [];
-  Swal.fire("Success", "Receipt saved realtime", "success");
-}
-
 
 
 function showReceipt(r){
@@ -1272,9 +1236,7 @@ function generateReceipt() {
   receiptItems = [];
   Swal.fire("Success", "Receipt saved realtime", "success");
 }
-function updateReceiptHistory(){
 
-let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
 
 let table = document.getElementById("receiptHistoryTable");
 table.innerHTML = "";
@@ -1307,10 +1269,8 @@ confirmButtonText:'Delete'
 
 if(result.isConfirmed){
 
-let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
 receipts.splice(index,1);
 
-localStorage.setItem("receipts", JSON.stringify(receipts));
 
 updateReceiptHistory();
 
@@ -1443,15 +1403,7 @@ function saveQuotationImage(){
 
 }
 
-function updateQuotationHeader(){
 
-  const now = new Date().toLocaleString(); // auto date + time
-
-  document.getElementById("qDateText").innerText = now;
-
-  document.getElementById("qToText").innerText =
-    document.getElementById("qTo").value || "N/A";
-}
 
 
 /* =======================
@@ -1459,7 +1411,6 @@ INITIALIZE
 ======================= */
 function filterReceipts(){
 
-let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
 
 const nameFilter = document.getElementById("filterName").value.toLowerCase();
 const fromMonth = document.getElementById("filterFrom").value;
@@ -1607,7 +1558,12 @@ db.ref("weeklyReports").on("value", snap => {
 }
 
 function saveExpensesToFirebase() {
-  db.ref("expenses").push(expense);
+ db.ref("expenses").push({
+  date: expenseDate.value,
+  desc: expenseDesc.value,
+  category: expenseCategory.value,
+  amount: Number(expenseAmount.value)
+});
 }
 
 function loadExpensesFromFirebase() {
@@ -1620,7 +1576,12 @@ function loadExpensesFromFirebase() {
 }
 
 function saveInventoryToFirebase() {
-db.ref("inventory").push(item);
+db.ref("inventory").push({
+  name: itemName.value,
+  qty: Number(itemQty.value),
+  min: Number(itemMin.value),
+  cost: Number(itemCost.value)
+});
 }
 
 function loadInventoryFromFirebase() {
