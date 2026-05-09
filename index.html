@@ -1246,10 +1246,15 @@ table.innerHTML += `
 document.getElementById("receiptTotal").innerText = "₱" + total;
 }
 function generateReceipt() {
+
   const name = rName.value;
   const address = rAddress.value;
 
-  if (!name) return Swal.fire("Error", "Enter name", "error");
+  if (!name)
+    return Swal.fire("Error", "Enter name", "error");
+
+  if (receiptItems.length === 0)
+    return Swal.fire("Error", "Add receipt items first", "error");
 
   const receipt = {
     name,
@@ -1259,10 +1264,20 @@ function generateReceipt() {
     items: receiptItems
   };
 
+  // SAVE TO FIREBASE
   db.ref("receipts").push(receipt);
 
+  // SHOW SA PREVIEW TABLE
+  showReceipt(receipt);
+
+  // CLEAR ITEMS
   receiptItems = [];
-  Swal.fire("Success", "Receipt saved realtime", "success");
+
+  Swal.fire(
+    "Success",
+    "Receipt saved realtime",
+    "success"
+  );
 }
 let weeklyReports = [];
 let expenses = [];
