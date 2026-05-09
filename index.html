@@ -32,6 +32,16 @@ body{
     #c9d4ff);
 }
 
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 600px; /* para hindi sumikip sa cp */
+  white-space: nowrap;
+}
+
 .sidebar{
   width:260px;
   height:100vh;
@@ -222,9 +232,7 @@ class="rounded-circle shadow mb-2">
 <small>Business Tracking System</small>
 </div>
 
-<button class="btn btn-primary" onclick="exportData()">
-<i class="fa-solid fa-download"></i> Export Backup
-</button>
+
 </div>
 
 <!-- DASHBOARD -->
