@@ -971,7 +971,7 @@ function addExpense(){
     expenses[expenseEditIndex] = expense;
 
     // 🔥 SAVE TO FIREBASE (EDIT MODE)
-    db.ref("expenses").set(expenses);
+    db.ref("expenses").push(expense);
 
     Swal.fire('Updated','Expense updated','success');
 
@@ -1703,7 +1703,7 @@ function loadWeeklyFromFirebase() {
 }
 
 function saveExpensesToFirebase() {
-  db.ref("expenses").set(expenses);
+  db.ref("expenses").push(expense);
 }
 
 function loadExpensesFromFirebase() {
@@ -1720,7 +1720,7 @@ function loadExpensesFromFirebase() {
 }
 
 function saveInventoryToFirebase() {
-  db.ref("inventory").set(inventory);
+db.ref("inventory").push(item);
 }
 
 function loadInventoryFromFirebase() {
