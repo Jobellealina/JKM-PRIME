@@ -832,48 +832,48 @@ let weeklyEditIndex = -1;
 
 function addWeeklyReport(){
 
-const period = document.getElementById('weekPeriod').value;
-const sales = parseFloat(document.getElementById('weekSales').value) || 0;
-const expensesValue = parseFloat(document.getElementById('weekExpenses').value) || 0;
+  const period = document.getElementById('weekPeriod').value;
+  const sales = parseFloat(document.getElementById('weekSales').value) || 0;
+  const expensesValue = parseFloat(document.getElementById('weekExpenses').value) || 0;
 
-if(!period){
+  if(!period){
+    Swal.fire('Error','Please enter week period','error');
+    return;
+  }
 
-Swal.fire('Error','Please enter week period','error');
-return;
+  const data = {
+    period,
+    sales,
+    expenses: expensesValue,
+    profit: sales - expensesValue
+  };
 
-}
+  if(weeklyEditIndex === -1){
+    // ADD MODE
+    weeklyReports.push(data);
 
-const data = {
-period,
-sales,
-expenses:expensesValue,
-profit:sales-expensesValue
-};
+    db.ref("weeklyReports").set(weeklyReports); // 🔥 SAVE TO FIREBASE
 
-if(weeklyEditIndex === -1){
+    Swal.fire('Success','Weekly report added','success');
 
-weeklyReports.push(data);
+  } else {
+    // EDIT MODE
+    weeklyReports[weeklyEditIndex] = data;
 
-Swal.fire('Success','Weekly report added','success');
+    db.ref("weeklyReports").set(weeklyReports); // 🔥 SAVE TO FIREBASE
 
-}else{
+    Swal.fire('Updated','Weekly report updated','success');
 
-weeklyReports[weeklyEditIndex] = data;
+    weeklyEditIndex = -1;
+  }
 
-Swal.fire('Updated','Weekly report updated','success');
+  saveData();
+  renderWeekly();
+  updateDashboard();
 
-weeklyEditIndex = -1;
-
-}
-
-saveData();
-renderWeekly();
-updateDashboard();
-
-document.getElementById('weekPeriod').value='';
-document.getElementById('weekSales').value='';
-document.getElementById('weekExpenses').value='';
-
+  document.getElementById('weekPeriod').value='';
+  document.getElementById('weekSales').value='';
+  document.getElementById('weekExpenses').value='';
 }
 
 function renderWeekly(){
@@ -958,78 +958,71 @@ let expenseEditIndex = -1;
 
 function addExpense(){
 
-const expense = {
-date:document.getElementById('expenseDate').value,
-desc:document.getElementById('expenseDesc').value,
-category:document.getElementById('expenseCategory').value,
-amount:parseFloat(document.getElementById('expenseAmount').value) || 0
-};
+  const expense = {
+    date: document.getElementById('expenseDate').value,
+    desc: document.getElementById('expenseDesc').value,
+    category: document.getElementById('expenseCategory').value,
+    amount: parseFloat(document.getElementById('expenseAmount').value) || 0
+  };
 
-if(expenseEditIndex === -1){
+  if(expenseEditIndex === -1){
 
-expenses.push(expense);
+    expenses.push(expense);
 
-Swal.fire('Success','Expense added','success');
+    // 🔥 SAVE TO FIREBASE (ADD MODE)
+    db.ref("expenses").set(expenses);
 
-}else{
+    Swal.fire('Success','Expense added','success');
 
-expenses[expenseEditIndex] = expense;
+  } else {
 
-Swal.fire('Updated','Expense updated','success');
+    expenses[expenseEditIndex] = expense;
 
-expenseEditIndex = -1;
+    // 🔥 SAVE TO FIREBASE (EDIT MODE)
+    db.ref("expenses").set(expenses);
 
-}
+    Swal.fire('Updated','Expense updated','success');
 
-saveData();
-renderExpenses();
-updateDashboard();
+    expenseEditIndex = -1;
+  }
 
-document.getElementById('expenseDate').value='';
-document.getElementById('expenseDesc').value='';
-document.getElementById('expenseCategory').value='';
-document.getElementById('expenseAmount').value='';
+  saveData();
+  renderExpenses();
+  updateDashboard();
 
+  document.getElementById('expenseDate').value='';
+  document.getElementById('expenseDesc').value='';
+  document.getElementById('expenseCategory').value='';
+  document.getElementById('expenseAmount').value='';
 }
 
 function renderExpenses(){
 
-const table = document.getElementById('expenseTable');
+  const table = document.getElementById('expenseTable');
+  table.innerHTML = '';
 
-table.innerHTML='';
+  expenses.forEach((e, index) => {
 
-expenses.forEach((e,index)=>{
+    table.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${e.date}</td>
+        <td>${e.desc}</td>
+        <td>${e.category}</td>
+        <td>₱${Number(e.amount).toLocaleString()}</td>
+        <td>
+          <button class="btn btn-warning btn-sm" onclick="editExpense('${e.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
 
-table.innerHTML += `
-<tr>
-
-<td>${index+1}</td>
-<td>${e.date}</td>
-<td>${e.desc}</td>
-<td>${e.category}</td>
-<td>₱${e.amount.toLocaleString()}</td>
-
-<td>
-
-<button class="btn btn-warning btn-sm"
-onclick="editExpense(${index})">
-<i class="fa-solid fa-pen"></i>
-</button>
-
-<button class="btn btn-danger btn-sm"
-onclick="deleteExpense(${index})">
-<i class="fa-solid fa-trash"></i>
-</button>
-
-</td>
-
-</tr>
-`;
-
-});
-
+          <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 }
-
 function editExpense(index){
 
 const e = expenses[index];
@@ -1688,10 +1681,14 @@ document.querySelectorAll(".sidebar a").forEach(link => {
 });
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://jkm-project-tracking-default-rtdb.firebaseio.com/",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: "AIzaSyAyCSmhRm6G05KoLiEFV-QK4fSZ67ql0UM",
+  authDomain: "jkm-project-tracking.firebaseapp.com",
+  databaseURL: "https://jkm-project-tracking-default-rtdb.firebaseio.com",
+  projectId: "jkm-project-tracking",
+  storageBucket: "jkm-project-tracking.firebasestorage.app",
+  messagingSenderId: "971289237705",
+  appId: "1:971289237705:web:cba8199d385afafafd9518",
+  measurementId: "G-W6SXWGV9QW"
 };
 
 firebase.initializeApp(firebaseConfig);
