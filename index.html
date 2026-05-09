@@ -1513,8 +1513,14 @@ function generateReceipt() {
   };
 
   // SAVE TO FIREBASE
-  db.ref("receipts").push(receipt);
+  db.ref("receipts").push(receipt).then(() => {
+  // force local update immediately
+  receipts.push(receipt);
 
+  renderReceiptHistory(receipts);
+  updateDashboard();
+  updateMonthlySummary();
+});
   // SHOW SA PREVIEW TABLE
   showReceipt(receipt);
 
