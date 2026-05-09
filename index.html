@@ -32,7 +32,20 @@ body{
     #c9d4ff);
 }
 
+.status-dropdown.paid {
+  background:#198754;
+  color:white;
+}
 
+.status-dropdown.unpaid {
+  background:#dc3545;
+  color:white;
+}
+
+.status-dropdown.settled {
+  background:#0d6efd;
+  color:white;
+}
 /* LOADING SCREEN */
 
 /* CMYK LOADING */
@@ -116,9 +129,10 @@ body{
 .sidebar a{
   display:block;
   color:white;
-  padding:14px 20px;
+  padding:10px 16px;  /* optional: konting bawas padding */
   text-decoration:none;
   transition:.3s;
+  font-size:13px;     /* 🔥 ito yung nagpapaliit ng text */
 }
 
 .sidebar a:hover,
@@ -276,7 +290,7 @@ class="rounded-circle shadow mb-2">
 <i class="fa-solid fa-file-invoice"></i> Quotation
 </a>
 <a href="tracking.html" class="nav-link" onclick="window.location.href='tracking.html'">
-<i class="fa-solid fa-file-invoice"></i> Tracking
+<i class="fa-solid fa-file-invoice"></i> SRP Calculator
 </a>
 <a href="#" class="nav-link" data-section="equipmentSection">
 <i class="fa-solid fa-screwdriver-wrench"></i> Equipment & Materials
@@ -291,8 +305,8 @@ class="rounded-circle shadow mb-2">
 
 <div class="topbar d-flex justify-content-between align-items-center">
 <div>
-<h4 class="mb-0">JKM Prime Digital Prints</h4>
-<small>Business Tracking System</small>
+<h4 class="mb-0" style="font-weight: 1000; color: navy;">JKM Prime Digital Prints</h4>
+<small>Printing Business</small>
 </div>
 
 
@@ -300,11 +314,29 @@ class="rounded-circle shadow mb-2">
 
 <!-- EQUIPMENT & MATERIALS -->
 <div id="equipmentSection" class="section">
+<!-- SUMMARY CARDS -->
+<div class="row g-3 mb-3">
 
+  <div class="col-md-6">
+    <div class="card-box bg-profit">
+      <h6>Mark Total Contribution</h6>
+      <h2 id="markTotal">₱0</h2>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card-box bg-sales">
+      <h6>Kaye & Jobelle Total Contribution</h6>
+      <h2 id="kjTotal">₱0</h2>
+    </div>
+  </div>
+
+</div>
   <div class="card border-0 shadow-sm rounded-4 mb-4">
     <div class="card-body">
       <h4>Equipment & Materials</h4>
 
+      
       <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#equipmentModal">
         <i class="fa-solid fa-plus"></i> Add Item
       </button>
@@ -954,134 +986,218 @@ Mark reviews this every end of month.
 
 <tr>
 <td>January 2026</td>
-<td id="janSales">₱0.00</td>
-<td id="janExpenses">₱0.00</td>
-<td id="janProfit">₱0.00</td>
-<td id="janMark">₱0.00</td>
-<td id="janKaye">₱0.00</td>
-<td id="janJobelle">₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td id="janSales">₱0</td>
+<td id="janExpenses">₱0</td>
+<td id="janProfit">₱0</td>
+<td id="janMark">₱0</td>
+<td id="janKaye">₱0</td>
+<td id="janJobelle">₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>February 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>March 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>April 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>May 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>June 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>July 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>August 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>September 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>October 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>November 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 <tr>
 <td>December 2026</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td>₱0.00</td>
-<td><input type="text" class="form-control"></td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>₱0</td>
+<td>
+  <select class="form-select status-dropdown">
+    <option value="good">Good</option>
+    <option value="warning">Needs Review</option>
+    <option value="critical">Critical Issue</option>
+    <option value="done">Done / Settled</option>
+  </select>
+</td>
 </tr>
 
 </tbody>
@@ -1090,13 +1206,13 @@ Mark reviews this every end of month.
 <tr>
 <td>YEAR TOTAL</td>
 
-<td id="yearSales">₱0.00</td>
-<td id="yearExpenses">₱0.00</td>
-<td id="yearProfit">₱0.00</td>
+<td id="yearSales">₱0</td>
+<td id="yearExpenses">₱0</td>
+<td id="yearProfit">₱0</td>
 
-<td id="yearMark">₱0.00</td>
-<td id="yearKaye">₱0.00</td>
-<td id="yearJobelle">₱0.00</td>
+<td id="yearMark">₱0</td>
+<td id="yearKaye">₱0</td>
+<td id="yearJobelle">₱0</td>
 
 <td></td>
 </tr>
@@ -2285,12 +2401,49 @@ function loadEquipmentFromFirebase() {
       : [];
 
     renderEquipment();
+    updateEquipmentSummary(); // ⭐ ADD THIS
 
   });
 
 }
+function updateEquipmentSummary() {
+
+  let markTotal = 0;
+  let kjTotal = 0;
+
+  equipment.forEach(e => {
+
+    const amount = Number(e.amount || 0);
+    const by = (e.by || "").toLowerCase();
+
+    if (by.includes("mark")) {
+      markTotal += amount;
+    } 
+    else if (
+      by.includes("kaye") ||
+      by.includes("jobelle") ||
+      by.includes("kaye & jobelle") ||
+      by.includes("kaye and jobelle")
+    ) {
+      kjTotal += amount;
+    }
+
+  });
+
+  document.getElementById("markTotal").innerText = "₱" + markTotal.toLocaleString();
+  document.getElementById("kjTotal").innerText = "₱" + kjTotal.toLocaleString();
+}
 let equipment = [];
 let equipmentEditId = null;
+
+document.addEventListener("change", function(e){
+  if(e.target.classList.contains("status-dropdown")){
+
+    e.target.classList.remove("paid","unpaid","settled");
+    e.target.classList.add(e.target.value);
+
+  }
+});
 </script>
 
 </body>
