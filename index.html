@@ -1547,11 +1547,11 @@ function generateReceipt() {
   // store temporarily
   window.pendingReceipt = receipt;
 
-  Swal.fire(
-    "Generated",
-    "Receipt preview ready. Click Save to store it in history.",
-    "success"
-  );
+ Swal.fire({
+  title: "Success",
+  text: "",
+  icon: "success"
+});
 }
 function saveReceipt() {
 
