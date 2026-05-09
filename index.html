@@ -16,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
@@ -340,7 +341,25 @@ class="rounded-circle shadow mb-2">
 
 </div>
 
+<div class="row mt-4">
+
+  <div class="col-md-8">
+    <div class="card shadow-sm p-3">
+      <h5>Sales vs Expenses vs Profit</h5>
+      <canvas id="dashboardChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm p-3" style="max-height:450px; overflow-y:auto;">
+      <h5 style="font-weight: 1000;">Recent Transactions</h5>
+      <div id="recentTransactions"></div>
+    </div>
+  </div>
+
 </div>
+</div>
+
 
 <!-- WEEKLY -->
 
@@ -1224,6 +1243,8 @@ expenses.splice(index,1);
 renderExpenses();
 updateDashboard();
 updateMonthlySummary();
+renderDashboardChart();
+renderRecentTransactions();
 
 
 Swal.fire('Deleted!','','success');
@@ -1796,6 +1817,8 @@ loadInventoryFromFirebase();
 loadReceiptsFromFirebase();
 setInterval(checkMonthChange, 60000); 
 checkMonthChange();
+renderDashboardChart();
+renderRecentTransactions();
 
 });
 document.getElementById("menuToggle").addEventListener("click", function () {
@@ -1830,6 +1853,8 @@ db.ref("weeklyReports").on("value", snap => {
   renderWeekly();
   updateDashboard();
   updateMonthlySummary();
+  renderDashboardChart();
+renderRecentTransactions();
 });
 }
 
@@ -1849,6 +1874,8 @@ function loadExpensesFromFirebase() {
   renderExpenses();
   updateDashboard();
   updateMonthlySummary();
+  renderDashboardChart();
+renderRecentTransactions();
 });
 }
 
@@ -1867,6 +1894,8 @@ function loadInventoryFromFirebase() {
   inventory = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
   renderInventory();
   updateDashboard();
+  renderDashboardChart();
+renderRecentTransactions();
 });
 }
 
@@ -1881,6 +1910,8 @@ db.ref("receipts").on("value", snap => {
   renderReceiptHistory(receipts);
   updateDashboard();
   updateMonthlySummary();
+  renderDashboardChart();
+renderRecentTransactions();
 });
 }
 function updateMonthlySummary(){
@@ -2044,9 +2075,57 @@ function checkMonthChange() {
     // refresh UI
     updateDashboard();
     updateMonthlySummary();
+    renderDashboardChart();
+renderRecentTransactions();
 
     Swal.fire("New Month Started", "Monthly data reset completed", "success");
   }
+}
+let dashboardChart;
+
+function renderDashboardChart() {
+
+  const sales = weeklyReports.reduce((a,b)=>a + (b.sales||0),0);
+  const expenses = weeklyReports.reduce((a,b)=>a + (b.expenses||0),0);
+  const profit = sales - expenses;
+
+  const ctx = document.getElementById("dashboardChart");
+
+  if (dashboardChart) dashboardChart.destroy();
+
+  dashboardChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["Sales", "Expenses", "Profit"],
+      datasets: [{
+        label: "Amount (₱)",
+        data: [sales, expenses, profit],
+        backgroundColor: [
+          "#20c997",
+          "#dc3545",
+          "#0d6efd"
+        ]
+      }]
+    }
+  });
+}
+function renderRecentTransactions() {
+
+  let box = document.getElementById("recentTransactions");
+  box.innerHTML = "";
+
+  receipts.slice(-10).reverse().forEach(r => {
+
+    const total = (r.items || []).reduce((a,b)=>a + b.total,0);
+
+    box.innerHTML += `
+      <div class="border-bottom py-2">
+        <small><b>${r.name}</b></small><br>
+        <small>${r.date}</small><br>
+        <span class="text-success">₱${total}</span>
+      </div>
+    `;
+  });
 }
 </script>
 
