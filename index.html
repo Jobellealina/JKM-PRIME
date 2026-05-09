@@ -797,9 +797,6 @@ function logout(){
     localStorage.removeItem("loggedIn");
     window.location.href = "login.html";
 }
-let weeklyReports = JSON.parse(localStorage.getItem('weeklyReports')) || [];
-let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
 
 /* =======================
 NAVIGATION
@@ -1056,6 +1053,9 @@ Swal.fire('Deleted!','','success');
 
 }
 
+function editExpense(id){
+  const item = expenses.find(e => e.id === id);
+}
 /* =======================
 INVENTORY CRUD
 ======================= */
@@ -1691,7 +1691,12 @@ const db = firebase.database();
 
 function loadWeeklyFromFirebase() {
   db.ref("weeklyReports").on("value", snapshot => {
-    weeklyReports = snapshot.val() || [];
+    const data = snapshot.val();
+
+    weeklyReports = data
+      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
+      : [];
+
     renderWeekly();
     updateDashboard();
   });
@@ -1703,7 +1708,12 @@ function saveExpensesToFirebase() {
 
 function loadExpensesFromFirebase() {
   db.ref("expenses").on("value", snapshot => {
-    expenses = snapshot.val() || [];
+    const data = snapshot.val();
+
+    expenses = data
+      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
+      : [];
+
     renderExpenses();
     updateDashboard();
   });
@@ -1715,7 +1725,12 @@ function saveInventoryToFirebase() {
 
 function loadInventoryFromFirebase() {
   db.ref("inventory").on("value", snapshot => {
-    inventory = snapshot.val() || [];
+    const data = snapshot.val();
+
+    inventory = data
+      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
+      : [];
+
     renderInventory();
     updateDashboard();
   });
