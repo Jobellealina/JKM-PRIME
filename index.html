@@ -849,27 +849,22 @@ function addWeeklyReport(){
   };
 
   if(weeklyEditIndex === -1){
-    // ADD MODE
-    weeklyReports.push(data);
 
-    db.ref("weeklyReports").set(weeklyReports); // 🔥 SAVE TO FIREBASE
+    // ADD MODE
+    db.ref("weeklyReports").push(data);
 
     Swal.fire('Success','Weekly report added','success');
 
   } else {
-    // EDIT MODE
-    weeklyReports[weeklyEditIndex] = data;
 
-    db.ref("weeklyReports").set(weeklyReports); // 🔥 SAVE TO FIREBASE
+    // EDIT MODE (FIXED)
+    const id = weeklyReports[weeklyEditIndex].id;
+    db.ref("weeklyReports/" + id).update(data);
 
     Swal.fire('Updated','Weekly report updated','success');
 
     weeklyEditIndex = -1;
   }
-
-  saveData();
-  renderWeekly();
-  updateDashboard();
 
   document.getElementById('weekPeriod').value='';
   document.getElementById('weekSales').value='';
