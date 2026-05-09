@@ -278,6 +278,9 @@ class="rounded-circle shadow mb-2">
 <a href="tracking.html" class="nav-link" onclick="window.location.href='tracking.html'">
 <i class="fa-solid fa-file-invoice"></i> Tracking
 </a>
+<a href="#" class="nav-link" data-section="equipmentSection">
+<i class="fa-solid fa-screwdriver-wrench"></i> Equipment & Materials
+</a>
 <a href="#" onclick="logout()">
 <i class="fa fa-right-from-bracket"></i> Logout
 </a>
@@ -295,6 +298,67 @@ class="rounded-circle shadow mb-2">
 
 </div>
 
+<!-- EQUIPMENT & MATERIALS -->
+<div id="equipmentSection" class="section">
+
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body">
+      <h4>Equipment & Materials</h4>
+
+      <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#equipmentModal">
+        <i class="fa-solid fa-plus"></i> Add Item
+      </button>
+
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body">
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th>Amount (₱)</th>
+            <th>Contributed By</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="equipmentTable"></tbody>
+      </table>
+
+    </div>
+  </div>
+
+</div>
+<div class="modal fade" id="equipmentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Add Equipment / Material</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input type="text" id="eqName" class="form-control mb-2" placeholder="Item Name">
+        <input type="number" id="eqAmount" class="form-control mb-2" placeholder="Amount">
+        <input type="text" id="eqBy" class="form-control mb-2" placeholder="Contributed By">
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="addEquipment()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
 <!-- LOADING SCREEN -->
 <!-- CMYK LOADING -->
 <div id="loadingScreen">
@@ -1839,6 +1903,7 @@ setInterval(checkMonthChange, 60000);
 checkMonthChange();
 renderDashboardChart();
 renderRecentTransactions();
+loadEquipmentFromFirebase();
 
 });
 document.getElementById("menuToggle").addEventListener("click", function () {
@@ -2147,6 +2212,85 @@ function renderRecentTransactions() {
     `;
   });
 }
+function addEquipment() {
+
+  const item = {
+    name: eqName.value,
+    amount: Number(eqAmount.value || 0),
+    by: eqBy.value,
+    date: new Date().toLocaleString()
+  };
+
+  if (!item.name || !item.by)
+    return Swal.fire("Error", "Complete fields", "error");
+
+  db.ref("equipment").push(item);
+
+  eqName.value = "";
+  eqAmount.value = "";
+  eqBy.value = "";
+
+  bootstrap.Modal.getInstance(document.getElementById("equipmentModal")).hide();
+}
+function renderEquipment() {
+
+  const table = document.getElementById("equipmentTable");
+  table.innerHTML = "";
+
+  equipment.forEach((e, i) => {
+
+    table.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${e.name}</td>
+        <td>₱${e.amount}</td>
+        <td>${e.by}</td>
+        <td>${e.date}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="deleteEquipment('${e.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+
+  });
+
+}
+function deleteEquipment(id) {
+
+  Swal.fire({
+    title: "Delete item?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete"
+  }).then(result => {
+
+    if (result.isConfirmed) {
+      db.ref("equipment/" + id).remove();
+      Swal.fire("Deleted!", "", "success");
+    }
+
+  });
+
+}
+function loadEquipmentFromFirebase() {
+
+  db.ref("equipment").on("value", snap => {
+
+    const data = snap.val();
+
+    equipment = data
+      ? Object.entries(data).map(([id, v]) => ({ id, ...v }))
+      : [];
+
+    renderEquipment();
+
+  });
+
+}
+let equipment = [];
+let equipmentEditId = null;
 </script>
 
 </body>
