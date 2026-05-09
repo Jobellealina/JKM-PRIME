@@ -34,30 +34,73 @@ body{
 
 /* LOADING SCREEN */
 
+/* CMYK LOADING */
+
 #loadingScreen{
   position:fixed;
   inset:0;
-  background:#0b1f4d;
-  z-index:99999;
+  background:white;
   display:flex;
   justify-content:center;
   align-items:center;
-  flex-direction:column;
-  transition:.5s;
+  z-index:999999;
+  transition:.4s;
 }
 
-.loader-box{
-  text-align:center;
-  color:white;
+.cmyk-loader{
+  position:relative;
+  width:90px;
+  height:90px;
 }
 
-.loader-box h3{
-  font-weight:bold;
-  margin:0;
+.c{
+  position:absolute;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  animation:spin 1.2s infinite ease-in-out;
+  mix-blend-mode:multiply;
 }
 
-.loader-box p{
-  opacity:.8;
+.cyan{
+  background:#00cfff;
+  top:0;
+  left:25px;
+}
+
+.magenta{
+  background:#ff00aa;
+  left:0;
+  top:25px;
+}
+
+.yellow{
+  background:#ffe600;
+  right:0;
+  top:25px;
+}
+
+.black{
+  background:#111;
+  bottom:0;
+  left:25px;
+}
+
+@keyframes spin{
+  0%{
+    transform:scale(1) rotate(0deg);
+    opacity:.8;
+  }
+
+  50%{
+    transform:scale(1.3) rotate(180deg);
+    opacity:1;
+  }
+
+  100%{
+    transform:scale(1) rotate(360deg);
+    opacity:.8;
+  }
 }
 .sidebar{
   width:260px;
@@ -253,14 +296,13 @@ class="rounded-circle shadow mb-2">
 </div>
 
 <!-- LOADING SCREEN -->
+<!-- CMYK LOADING -->
 <div id="loadingScreen">
-  <div class="loader-box">
-    <img src="logo.png" width="90" class="mb-3">
-
-    <h3>JKM PRIME</h3>
-    <p>Loading System...</p>
-
-    <div class="spinner-border text-light mt-2"></div>
+  <div class="cmyk-loader">
+    <span class="c cyan"></span>
+    <span class="c magenta"></span>
+    <span class="c yellow"></span>
+    <span class="c black"></span>
   </div>
 </div>
 <!-- DASHBOARD -->
