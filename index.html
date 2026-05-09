@@ -988,9 +988,6 @@ Swal.fire('Deleted!','','success');
 
 }
 
-let weeklyReports = [];
-let expenses = [];
-let inventory = [];
 /* =======================
 INVENTORY CRUD
 ======================= */
@@ -1241,28 +1238,12 @@ function generateReceipt() {
   receiptItems = [];
   Swal.fire("Success", "Receipt saved realtime", "success");
 }
+let weeklyReports = [];
+let expenses = [];
+let inventory = [];
+let receipts = []; // 🔥 ADD THIS
 
 
-let table = document.getElementById("receiptHistoryTable");
-table.innerHTML = "";
-
-receipts.forEach((r,index)=>{
-table.innerHTML += `
-<tr>
-<td>${r.receiptNo}</td>
-<td>${r.name}</td>
-<td>${r.date}</td>
-<td>₱${r.items.reduce((sum,i)=>sum+i.total,0)}</td>
-<td>
-  <button onclick="deleteReceipt(${index})" class="btn btn-danger btn-sm">
-    Delete
-  </button>
-</td>
-</tr>
-`;
-});
-
-}
 function deleteReceipt(index){
 
 Swal.fire({
@@ -1336,13 +1317,16 @@ function renderQuotation() {
   document.getElementById("grandTotal").innerText = total;
 }
 
-function renderReceiptHistory(list) {
-  receiptHistoryTable.innerHTML = "";
+function renderReceiptHistory(list = receipts) {
+  const table = document.getElementById("receiptHistoryTable");
+  table.innerHTML = "";
 
-  list.forEach((r, i) => {
-    const total = r.items.reduce((s, x) => s + x.total, 0);
+  list.forEach((r) => {
+    const total = r.items
+      ? r.items.reduce((s, i) => s + i.total, 0)
+      : 0;
 
-    receiptHistoryTable.innerHTML += `
+    table.innerHTML += `
       <tr>
         <td>${r.receiptNo}</td>
         <td>${r.name}</td>
@@ -1350,7 +1334,7 @@ function renderReceiptHistory(list) {
         <td>₱${total}</td>
         <td>
           <button class="btn btn-danger btn-sm"
-            onclick="db.ref('receipts/${r.id}').remove()">
+            onclick="deleteReceipt('${r.id}')">
             Delete
           </button>
         </td>
@@ -1359,6 +1343,19 @@ function renderReceiptHistory(list) {
   });
 }
 
+function deleteReceipt(id) {
+  Swal.fire({
+    title: "Delete receipt?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      db.ref("receipts/" + id).remove();
+      Swal.fire("Deleted!", "", "success");
+    }
+  });
+}
 function saveQuotationImage(){
 
   document.getElementById("pTo").innerText =
