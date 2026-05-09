@@ -1512,26 +1512,21 @@ function generateReceipt() {
     items: receiptItems
   };
 
-  // SAVE TO FIREBASE
+  // SAVE ONLY TO FIREBASE
   db.ref("receipts").push(receipt).then(() => {
-  // force local update immediately
-  receipts.push(receipt);
 
-  renderReceiptHistory(receipts);
-  updateDashboard();
-  updateMonthlySummary();
-});
-  // SHOW SA PREVIEW TABLE
-  showReceipt(receipt);
+    Swal.fire(
+      "Success",
+      "Receipt saved realtime",
+      "success"
+    );
 
-  // CLEAR ITEMS
-  receiptItems = [];
+    // OPTIONAL: show preview after save
+    showReceipt(receipt);
 
-  Swal.fire(
-    "Success",
-    "Receipt saved realtime",
-    "success"
-  );
+    // clear items AFTER save
+    receiptItems = [];
+  });
 }
 let weeklyReports = [];
 let expenses = [];
