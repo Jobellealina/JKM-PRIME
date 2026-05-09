@@ -501,7 +501,7 @@ class="rounded-circle shadow mb-2">
       </div>
 
       <div class="col-md-4">
-        <button class="btn btn-primary w-100" onclick="addReceiptItem()">
+        <button class="btn btn-primary w-80" onclick="addReceiptItem()">
           Add Item
         </button>
       </div>
@@ -510,23 +510,30 @@ class="rounded-circle shadow mb-2">
     <hr>
 
     <div class="row g-2">
-      <div class="col-md-4">
-        <input type="text" id="rService" class="form-control" placeholder="Service">
-      </div>
+  <div class="col-md-4">
+    <input type="text" id="rService" class="form-control" placeholder="Service">
+  </div>
 
-      <div class="col-md-2">
-        <input type="number" id="rQty" class="form-control" placeholder="Qty">
-      </div>
+  <div class="col-md-2">
+    <input type="number" id="rQty" class="form-control" placeholder="Qty">
+  </div>
 
-      <div class="col-md-3">
-        <input type="number" id="rPrice" class="form-control" placeholder="Price">
-      </div>
+  <div class="col-md-3">
+    <input type="number" id="rPrice" class="form-control form-control-sm" placeholder="Price">
+  </div>
 
-      <div class="col-md-3">
-        <button class="btn btn-success w-100" onclick="generateReceipt()">
-          Generate Receipt
-        </button>
-      </div>
+  <div class="col-md-3 d-flex gap-1 align-items-end">
+
+    <button type="button" class="btn btn-primary btn-m" onclick="generateReceipt()">
+      Gen
+    </button>
+
+    <button type="button" class="btn btn-success btn-m" onclick="saveReceipt()">
+      Save
+    </button>
+
+  </div>
+
     </div>
   </div>
 
@@ -1534,20 +1541,33 @@ function generateReceipt() {
     items: receiptItems
   };
 
-  // SAVE ONLY TO FIREBASE
-  db.ref("receipts").push(receipt).then(() => {
+  // 👉 PREVIEW ONLY (NO SAVE YET)
+  showReceipt(receipt);
 
-    Swal.fire(
-      "Success",
-      "Receipt saved realtime",
-      "success"
-    );
+  // store temporarily
+  window.pendingReceipt = receipt;
 
-    // OPTIONAL: show preview after save
-    showReceipt(receipt);
+  Swal.fire(
+    "Generated",
+    "Receipt preview ready. Click Save to store it in history.",
+    "success"
+  );
+}
+function saveReceipt() {
 
-    // clear items AFTER save
+  if (!window.pendingReceipt) {
+    return Swal.fire("Error", "No generated receipt yet", "error");
+  }
+
+  db.ref("receipts").push(window.pendingReceipt).then(() => {
+
+    Swal.fire("Saved", "Receipt added to history", "success");
+
     receiptItems = [];
+    window.pendingReceipt = null;
+
+    rName.value = "";
+    rAddress.value = "";
   });
 }
 let weeklyReports = [];
