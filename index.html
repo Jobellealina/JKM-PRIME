@@ -827,82 +827,42 @@ WEEKLY CRUD
 
 let weeklyEditIndex = -1;
 
-function addWeeklyReport(){
+function addWeeklyReport() {
+  const period = weekPeriod.value;
+  const sales = Number(weekSales.value || 0);
+  const expensesVal = Number(weekExpenses.value || 0);
 
-  const period = document.getElementById('weekPeriod').value;
-  const sales = parseFloat(document.getElementById('weekSales').value) || 0;
-  const expensesValue = parseFloat(document.getElementById('weekExpenses').value) || 0;
+  if (!period) return Swal.fire("Error", "Enter week period", "error");
 
-  if(!period){
-    Swal.fire('Error','Please enter week period','error');
-    return;
-  }
-
-  const data = {
+  db.ref("weeklyReports").push({
     period,
     sales,
-    expenses: expensesValue,
-    profit: sales - expensesValue
-  };
+    expenses: expensesVal,
+    profit: sales - expensesVal
+  });
 
-  if(weeklyEditIndex === -1){
-
-    // ADD MODE
-    db.ref("weeklyReports").push(data);
-
-    Swal.fire('Success','Weekly report added','success');
-
-  } else {
-
-    // EDIT MODE (FIXED)
-    const id = weeklyReports[weeklyEditIndex].id;
-    db.ref("weeklyReports/" + id).update(data);
-
-    Swal.fire('Updated','Weekly report updated','success');
-
-    weeklyEditIndex = -1;
-  }
-
-  document.getElementById('weekPeriod').value='';
-  document.getElementById('weekSales').value='';
-  document.getElementById('weekExpenses').value='';
+  weekPeriod.value = "";
+  weekSales.value = "";
+  weekExpenses.value = "";
 }
 
-function renderWeekly(){
+function renderWeekly() {
+  weeklyTable.innerHTML = "";
 
-const table = document.getElementById('weeklyTable');
-
-table.innerHTML='';
-
-weeklyReports.forEach((r,index)=>{
-
-table.innerHTML += `
-<tr>
-<td>${index+1}</td>
-<td>${r.period}</td>
-<td>₱${r.sales.toLocaleString()}</td>
-<td>₱${r.expenses.toLocaleString()}</td>
-<td>₱${r.profit.toLocaleString()}</td>
-
-<td>
-
-<button class="btn btn-warning btn-sm"
-onclick="editWeekly(${index})">
-<i class="fa-solid fa-pen"></i>
-</button>
-
-<button class="btn btn-danger btn-sm"
-onclick="deleteWeekly(${index})">
-<i class="fa-solid fa-trash"></i>
-</button>
-
-</td>
-
-</tr>
-`;
-
-});
-
+  weeklyReports.forEach((r, i) => {
+    weeklyTable.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.period}</td>
+        <td>₱${r.sales}</td>
+        <td>₱${r.expenses}</td>
+        <td>₱${r.profit}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="db.ref('weeklyReports/${r.id}').remove()">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
 }
 
 function editWeekly(index){
@@ -948,67 +908,40 @@ EXPENSE CRUD
 
 let expenseEditIndex = -1;
 
-function addExpense(){
-
+function addExpense() {
   const expense = {
-    date: document.getElementById('expenseDate').value,
-    desc: document.getElementById('expenseDesc').value,
-    category: document.getElementById('expenseCategory').value,
-    amount: parseFloat(document.getElementById('expenseAmount').value) || 0
+    date: expenseDate.value,
+    desc: expenseDesc.value,
+    category: expenseCategory.value,
+    amount: Number(expenseAmount.value || 0)
   };
 
-  if(expenseEditIndex === -1){
+  if (!expense.date || !expense.desc)
+    return Swal.fire("Error", "Complete fields", "error");
 
-    expenses.push(expense);
+  db.ref("expenses").push(expense);
 
-    // 🔥 SAVE TO FIREBASE (ADD MODE)
-    db.ref("expenses").push(expense);
-
-    Swal.fire('Success','Expense added','success');
-
-  } else {
-
-    expenses[expenseEditIndex] = expense;
-
-    // 🔥 SAVE TO FIREBASE (EDIT MODE)
-    db.ref("expenses").push(expense);
-
-    Swal.fire('Updated','Expense updated','success');
-
-    expenseEditIndex = -1;
-  }
-
-  saveData();
-  renderExpenses();
-  updateDashboard();
-
-  document.getElementById('expenseDate').value='';
-  document.getElementById('expenseDesc').value='';
-  document.getElementById('expenseCategory').value='';
-  document.getElementById('expenseAmount').value='';
+  expenseDate.value = "";
+  expenseDesc.value = "";
+  expenseCategory.value = "";
+  expenseAmount.value = "";
 }
 
-function renderExpenses(){
+function renderExpenses() {
+  expenseTable.innerHTML = "";
 
-  const table = document.getElementById('expenseTable');
-  table.innerHTML = '';
-
-  expenses.forEach((e, index) => {
-
-    table.innerHTML += `
+  expenses.forEach((e, i) => {
+    expenseTable.innerHTML += `
       <tr>
-        <td>${index + 1}</td>
+        <td>${i + 1}</td>
         <td>${e.date}</td>
         <td>${e.desc}</td>
         <td>${e.category}</td>
-        <td>₱${Number(e.amount).toLocaleString()}</td>
+        <td>₱${e.amount}</td>
         <td>
-          <button class="btn btn-warning btn-sm" onclick="editExpense('${e.id}')">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-
-          <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">
-            <i class="fa-solid fa-trash"></i>
+          <button class="btn btn-danger btn-sm"
+            onclick="db.ref('expenses/${e.id}').remove()">
+            Delete
           </button>
         </td>
       </tr>
@@ -1056,6 +989,8 @@ Swal.fire('Deleted!','','success');
 let weeklyReports = [];
 let expenses = [];
 let inventory = [];
+let receipts = [];
+let quotationItems = [];
 /* =======================
 INVENTORY CRUD
 ======================= */
@@ -1063,74 +998,51 @@ INVENTORY CRUD
 let inventoryEditIndex = -1;
 
 /* ADD INVENTORY */
-function addInventory(){
+function addInventory() {
+  const item = {
+    name: itemName.value,
+    qty: Number(itemQty.value || 0),
+    min: Number(itemMin.value || 0),
+    cost: Number(itemCost.value || 0)
+  };
 
-const item = {
-  name: document.getElementById('itemName').value.trim(),
-  qty: Number(document.getElementById('itemQty').value) || 0,
-  min: Number(document.getElementById('itemMin').value) || 0,
-  cost: Number(document.getElementById('itemCost').value) || 0
-};
+  if (!item.name) return Swal.fire("Error", "Enter item name", "error");
 
-if(!item.name){
-  Swal.fire('Error','Item name required','error');
-  return;
-}
+  db.ref("inventory").push(item);
 
-inventory.push(item);
-
-saveData();
-renderInventory();
-updateDashboard();
-
-document.getElementById('itemName').value='';
-document.getElementById('itemQty').value='';
-document.getElementById('itemMin').value='';
-document.getElementById('itemCost').value='';
+  itemName.value = "";
+  itemQty.value = "";
+  itemMin.value = "";
+  itemCost.value = "";
 }
 
 
 /* RENDER INVENTORY (MISSING BEFORE → FIXED) */
-function renderInventory(){
+function renderInventory() {
+  inventoryTable.innerHTML = "";
 
-const table = document.getElementById('inventoryTable');
-table.innerHTML = '';
+  inventory.forEach((i, index) => {
+    let status =
+      i.qty <= 0 ? "Out" :
+      i.qty <= i.min ? "Low" : "OK";
 
-inventory.forEach((i,index)=>{
-
-let status = '';
-let badge = '';
-
-if(i.qty <= 0){
-  status = "Out of Stock";
-  badge = "badge-out";
-}else if(i.qty <= i.min){
-  status = "Low Stock";
-  badge = "badge-low";
-}else{
-  status = "OK";
-  badge = "badge-ok";
-}
-
-table.innerHTML += `
-<tr>
-<td>${index+1}</td>
-<td>${i.name}</td>
-<td>${i.qty}</td>
-<td>${i.min}</td>
-<td>₱${i.cost.toLocaleString()}</td>
-<td><span class="badge ${badge}">${status}</span></td>
-<td>
-  <button class="btn btn-warning btn-sm" onclick="editInventory(${index})">
-    <i class="fa-solid fa-pen"></i>
-  </button>
-  <button class="btn btn-danger btn-sm" onclick="deleteInventory(${index})">
-    <i class="fa-solid fa-trash"></i>
-  </button>
-</td>
-</tr>
-`;
-});
+    inventoryTable.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.min}</td>
+        <td>₱${i.cost}</td>
+        <td>${status}</td>
+        <td>
+          <button class="btn btn-danger btn-sm"
+            onclick="db.ref('inventory/${i.id}').remove()">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 }
 
 
@@ -1198,36 +1110,30 @@ Swal.fire('Deleted!','','success');
 DASHBOARD
 ======================= */
 
-function updateDashboard(){
+function updateDashboard() {
+  const sales = weeklyReports.reduce((a, b) => a + b.sales, 0)
+    + receipts.reduce((a, b) =>
+      a + b.items.reduce((s, i) => s + i.total, 0), 0);
 
-const weeklySales = weeklyReports.reduce((sum,r)=>sum + r.sales,0);
+  const expensesTotal =
+    weeklyReports.reduce((a, b) => a + b.expenses, 0)
+    + expenses.reduce((a, b) => a + b.amount, 0);
 
-// 🔥 ADD RECEIPTS SALES
-const receiptSales = JSON.parse(localStorage.getItem("receipts") || "[]")
-.reduce((sum,r)=>{
-  return sum + r.items.reduce((s,i)=>s + i.total,0);
-},0);
+  const profit = sales - expensesTotal;
 
-const sales = weeklySales + receiptSales;
-
-const weeklyExpenses = weeklyReports.reduce((sum,r)=>sum + r.expenses,0);
-const expenseLogTotal = expenses.reduce((sum,e)=>sum + e.amount,0);
-
-const totalExpenses = weeklyExpenses + expenseLogTotal;
-
-const profit = sales - totalExpenses;
-
-document.getElementById('totalSales').innerText='₱'+sales.toLocaleString();
-document.getElementById('totalExpenses').innerText='₱'+totalExpenses.toLocaleString();
-document.getElementById('totalProfit').innerText='₱'+profit.toLocaleString();
-
-document.getElementById('inventoryCount').innerText=inventory.length;
-
-document.getElementById('monthSales').innerText='₱'+sales.toLocaleString();
-document.getElementById('monthExpenses').innerText='₱'+totalExpenses.toLocaleString();
-document.getElementById('monthProfit').innerText='₱'+profit.toLocaleString();
-
+  totalSales.innerText = "₱" + sales;
+  totalExpenses.innerText = "₱" + expensesTotal;
+  totalProfit.innerText = "₱" + profit;
+  inventoryCount.innerText = inventory.length;
 }
+
+/* =======================
+INIT (IMPORTANT)
+======================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateDashboard();
+});
 
 /* =======================
 SAVE
@@ -1275,15 +1181,13 @@ let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
 let receiptItems = [];
 receiptItems = [];
 
-function addReceiptItem(){
-  const service = document.getElementById("rService").value;
-  const qty = Number(document.getElementById("rQty").value);
-  const price = Number(document.getElementById("rPrice").value);
+function addReceiptItem() {
+  const service = rService.value;
+  const qty = Number(rQty.value);
+  const price = Number(rPrice.value);
 
-  if(!service || qty <= 0 || price <= 0){
-    Swal.fire("Error","Complete item details","error");
-    return;
-  }
+  if (!service || qty <= 0 || price <= 0)
+    return Swal.fire("Error", "Fill item", "error");
 
   receiptItems.push({
     service,
@@ -1292,9 +1196,30 @@ function addReceiptItem(){
     total: qty * price
   });
 
-  showReceiptPreview();
+  rService.value = "";
+  rQty.value = "";
+  rPrice.value = "";
 }
 
+function generateReceipt() {
+  const name = rName.value;
+  const address = rAddress.value;
+
+  if (!name) return Swal.fire("Error", "Enter name", "error");
+
+  const receipt = {
+    name,
+    address,
+    date: new Date().toLocaleString(),
+    receiptNo: "JKM" + Date.now(),
+    items: receiptItems
+  };
+
+  db.ref("receipts").push(receipt);
+
+  receiptItems = [];
+  Swal.fire("Success", "Receipt saved realtime", "success");
+}
 
 
 
@@ -1328,38 +1253,24 @@ table.innerHTML += `
 
 document.getElementById("receiptTotal").innerText = "₱" + total;
 }
-function generateReceipt(){
+function generateReceipt() {
+  const name = rName.value;
+  const address = rAddress.value;
 
-const name = document.getElementById("rName").value;
-const address = document.getElementById("rAddress").value;
+  if (!name) return Swal.fire("Error", "Enter name", "error");
 
-if(!name){
-Swal.fire("Error","Enter customer name","error");
-return;
-}
+  const receipt = {
+    name,
+    address,
+    date: new Date().toLocaleString(),
+    receiptNo: "JKM" + Date.now(),
+    items: receiptItems
+  };
 
-const receiptNo = "JKM" + Math.floor(100000 + Math.random() * 900000);
+  db.ref("receipts").push(receipt);
 
-let receipt = {
-receiptNo,
-name,
-address,
-date: new Date().toLocaleString(),
-items: receiptItems
-};
-
-let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
-receipts.push(receipt);
-
-localStorage.setItem("receipts", JSON.stringify(receipts));
-
-showReceipt(receipt);
-updateReceiptHistory(); // ✅ important
-
-receiptItems = []; // reset
-updateDashboard();
-Swal.fire("Success","Receipt generated","success");
-
+  receiptItems = [];
+  Swal.fire("Success", "Receipt saved realtime", "success");
 }
 function updateReceiptHistory(){
 
@@ -1460,32 +1371,29 @@ function renderQuotation() {
   document.getElementById("grandTotal").innerText = total;
 }
 
-function renderReceiptHistory(receipts){
+function renderReceiptHistory(list) {
+  receiptHistoryTable.innerHTML = "";
 
-let table = document.getElementById("receiptHistoryTable");
-table.innerHTML = "";
+  list.forEach((r, i) => {
+    const total = r.items.reduce((s, x) => s + x.total, 0);
 
-receipts.forEach((r,index)=>{
-
-let total = r.items.reduce((sum,i)=>sum+i.total,0);
-
-table.innerHTML += `
-<tr>
-<td>${r.receiptNo}</td>
-<td>${r.name}</td>
-<td>${r.date}</td>
-<td>₱${total}</td>
-<td>
-  <button onclick="deleteReceipt(${index})" class="btn btn-danger btn-sm">
-    Delete
-  </button>
-</td>
-</tr>
-`;
-
-});
-
+    receiptHistoryTable.innerHTML += `
+      <tr>
+        <td>${r.receiptNo}</td>
+        <td>${r.name}</td>
+        <td>${r.date}</td>
+        <td>₱${total}</td>
+        <td>
+          <button class="btn btn-danger btn-sm"
+            onclick="db.ref('receipts/${r.id}').remove()">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 }
+
 function saveQuotationImage(){
 
   document.getElementById("pTo").innerText =
@@ -1682,24 +1590,20 @@ const firebaseConfig = {
   projectId: "jkm-project-tracking",
   storageBucket: "jkm-project-tracking.firebasestorage.app",
   messagingSenderId: "971289237705",
-  appId: "1:971289237705:web:cba8199d385afafafd9518",
-  measurementId: "G-W6SXWGV9QW"
+  appId: "1:971289237705:web:cba8199d385afafafd9518"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+
 function loadWeeklyFromFirebase() {
-  db.ref("weeklyReports").on("value", snapshot => {
-    const data = snapshot.val();
-
-    weeklyReports = data
-      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
-      : [];
-
-    renderWeekly();
-    updateDashboard();
-  });
+db.ref("weeklyReports").on("value", snap => {
+  const data = snap.val();
+  weeklyReports = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+  renderWeekly();
+  updateDashboard();
+});
 }
 
 function saveExpensesToFirebase() {
@@ -1707,16 +1611,12 @@ function saveExpensesToFirebase() {
 }
 
 function loadExpensesFromFirebase() {
-  db.ref("expenses").on("value", snapshot => {
-    const data = snapshot.val();
-
-    expenses = data
-      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
-      : [];
-
-    renderExpenses();
-    updateDashboard();
-  });
+  db.ref("expenses").on("value", snap => {
+  const data = snap.val();
+  expenses = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+  renderExpenses();
+  updateDashboard();
+});
 }
 
 function saveInventoryToFirebase() {
@@ -1724,16 +1624,12 @@ db.ref("inventory").push(item);
 }
 
 function loadInventoryFromFirebase() {
-  db.ref("inventory").on("value", snapshot => {
-    const data = snapshot.val();
-
-    inventory = data
-      ? Object.entries(data).map(([id, val]) => ({ id, ...val }))
-      : [];
-
-    renderInventory();
-    updateDashboard();
-  });
+  db.ref("inventory").on("value", snap => {
+  const data = snap.val();
+  inventory = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+  renderInventory();
+  updateDashboard();
+});
 }
 
 function saveReceiptsToFirebase(receipts) {
@@ -1741,11 +1637,12 @@ function saveReceiptsToFirebase(receipts) {
 }
 
 function loadReceiptsFromFirebase() {
-  db.ref("receipts").on("value", snapshot => {
-    localStorage.setItem("receipts", JSON.stringify(snapshot.val() || []));
-    updateReceiptHistory();
-    updateDashboard();
-  });
+db.ref("receipts").on("value", snap => {
+  const data = snap.val();
+  receipts = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+  renderReceiptHistory(receipts);
+  updateDashboard();
+});
 }
 </script>
 
