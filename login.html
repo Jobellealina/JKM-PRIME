@@ -106,10 +106,12 @@ CIRCULAR CMYK LOADER (NO BACKGROUND)
 ========================= */
 .loader-overlay{
     position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
+    inset:0;
     display:none;
+    justify-content:center;
+    align-items:center;
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(3px);
     z-index:9999;
 }
 
@@ -137,8 +139,23 @@ CIRCULAR CMYK LOADER (NO BACKGROUND)
 .dot:nth-child(4){ background:black; left:0; top:50%; transform:translateY(-50%); }
 
 @keyframes spin{
-    from{ transform:translate(-50%,-50%) rotate(0deg); }
-    to{ transform:translate(-50%,-50%) rotate(360deg); }
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.loader-overlay{
+    opacity:0;
+    transition:.3s;
+}
+
+.loader-overlay.show{
+    display:flex;
+    opacity:1;
 }
 
 @media (max-width: 768px){
@@ -343,7 +360,7 @@ if(user === "JKM PRIME" && pass === "Jkm@2026"){
     localStorage.setItem("loggedIn","true");
 
     // SHOW CIRCULAR LOADER
-    document.getElementById("loader").style.display = "block";
+   document.getElementById("loader").classList.add("show");
 
     setTimeout(()=>{
         window.location.href = "index.html";

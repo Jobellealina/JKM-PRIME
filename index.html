@@ -58,8 +58,14 @@ body{
   width:35px;
   height:35px;
   border-radius:50%;
-  animation:spin 1.2s infinite ease-in-out;
   mix-blend-mode:multiply;
+}
+
+.cmyk-loader{
+  position:relative;
+  width:90px;
+  height:90px;
+  animation:rotateLoader 1.5s linear infinite;
 }
 
 .cyan{
@@ -85,23 +91,16 @@ body{
   bottom:0;
   left:25px;
 }
-
-@keyframes spin{
+@keyframes rotateLoader{
   0%{
-    transform:scale(1) rotate(0deg);
-    opacity:.8;
-  }
-
-  50%{
-    transform:scale(1.3) rotate(180deg);
-    opacity:1;
+    transform:rotate(0deg);
   }
 
   100%{
-    transform:scale(1) rotate(360deg);
-    opacity:.8;
+    transform:rotate(360deg);
   }
 }
+
 .sidebar{
   width:260px;
   height:100vh;
@@ -869,26 +868,19 @@ JKM PRIME DIGITAL PRINTS</p>
 <script>
 window.addEventListener("load", ()=>{
 
-  // show loading first
+  const loading = document.getElementById("loadingScreen");
+
+  loading.style.display = "flex";
+
   setTimeout(()=>{
 
-    // check login
-    if(localStorage.getItem("loggedIn") !== "true"){
+    loading.style.opacity = "0";
 
-      window.location.href = "login.html";
+    setTimeout(()=>{
+      loading.style.display = "none";
+    },500);
 
-    }else{
-
-      // hide loading
-      document.getElementById("loadingScreen").style.opacity = "0";
-
-      setTimeout(()=>{
-        document.getElementById("loadingScreen").style.display = "none";
-      },500);
-
-    }
-
-  },2000); // 2 seconds loading
+  },1800);
 
 });
 function logout(){
