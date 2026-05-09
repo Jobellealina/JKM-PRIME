@@ -880,7 +880,7 @@ weeklyEditIndex = index;
 
 }
 
-function deleteWeekly(index){
+function deleteWeekly(id){
 
 Swal.fire({
 title:'Delete report?',
@@ -891,11 +891,7 @@ confirmButtonText:'Delete'
 
 if(result.isConfirmed){
 
-weeklyReports.splice(index,1);
-
-saveData();
-renderWeekly();
-updateDashboard();
+db.ref("weeklyReports/" + id).remove();
 
 Swal.fire('Deleted!','','success');
 
@@ -976,7 +972,6 @@ if(result.isConfirmed){
 
 expenses.splice(index,1);
 
-saveData();
 renderExpenses();
 updateDashboard();
 
@@ -1033,7 +1028,7 @@ function renderInventory() {
         <td>${status}</td>
         <td>
           <button class="btn btn-danger btn-sm"
-            onclick="db.ref('inventory/${i.id}').remove()">
+           onclick="deleteInventory('${i.id}')">
             Delete
           </button>
         </td>
@@ -1062,27 +1057,30 @@ new bootstrap.Modal(document.getElementById('inventoryModal')).show();
 
 
 /* SAVE EDIT */
-function saveInventory(){
 
-const item = {
-  name: document.getElementById('modalItemName').value.trim(),
-  qty: Number(document.getElementById('modalItemQty').value) || 0,
-  min: Number(document.getElementById('modalItemMin').value) || 0,
-  cost: Number(document.getElementById('modalItemCost').value) || 0
-};
+function saveInventory() {
 
-inventory[inventoryEditIndex] = item;
+  const item = {
+    name: document.getElementById('modalItemName').value.trim(),
+    qty: Number(document.getElementById('modalItemQty').value) || 0,
+    min: Number(document.getElementById('modalItemMin').value) || 0,
+    cost: Number(document.getElementById('modalItemCost').value) || 0
+  };
 
-saveData();
-renderInventory();
-updateDashboard();
+  const itemId = inventory[inventoryEditIndex].id;
 
-bootstrap.Modal.getInstance(document.getElementById('inventoryModal')).hide();
+  db.ref("inventory/" + itemId).update(item);
+
+  bootstrap.Modal.getInstance(
+    document.getElementById('inventoryModal')
+  ).hide();
+
+  Swal.fire("Updated", "Inventory updated realtime", "success");
 }
 
 
 /* DELETE */
-function deleteInventory(index){
+function deleteInventory(id){
 
 Swal.fire({
 title:'Delete item?',
@@ -1092,11 +1090,11 @@ confirmButtonText:'Delete'
 }).then((result)=>{
 
 if(result.isConfirmed){
-inventory.splice(index,1);
-saveData();
-renderInventory();
-updateDashboard();
+
+db.ref("inventory/" + id).remove();
+
 Swal.fire('Deleted!','','success');
+
 }
 
 });
@@ -1108,13 +1106,37 @@ DASHBOARD
 ======================= */
 
 function updateDashboard() {
-  const sales = weeklyReports.reduce((a, b) => a + b.sales, 0)
-    + receipts.reduce((a, b) =>
-      a + b.items.reduce((s, i) => s + i.total, 0), 0);
+
+  const weeklySales =
+    weeklyReports.reduce(
+      (a, b) => a + (Number(b.sales) || 0),
+      0
+    );
+
+  const receiptSales =
+    receipts.reduce((a, r) => {
+
+      const total =
+        (r.items || []).reduce(
+          (s, i) => s + (Number(i.total) || 0),
+          0
+        );
+
+      return a + total;
+
+    }, 0);
+
+  const sales = weeklySales + receiptSales;
 
   const expensesTotal =
-    weeklyReports.reduce((a, b) => a + b.expenses, 0)
-    + expenses.reduce((a, b) => a + b.amount, 0);
+    weeklyReports.reduce(
+      (a, b) => a + (Number(b.expenses) || 0),
+      0
+    ) +
+    expenses.reduce(
+      (a, b) => a + (Number(b.amount) || 0),
+      0
+    );
 
   const profit = sales - expensesTotal;
 
@@ -1122,8 +1144,12 @@ function updateDashboard() {
   totalExpenses.innerText = "₱" + expensesTotal;
   totalProfit.innerText = "₱" + profit;
   inventoryCount.innerText = inventory.length;
-}
 
+  // MONTHLY SUMMARY
+  monthSales.innerText = "₱" + sales;
+  monthExpenses.innerText = "₱" + expensesTotal;
+  monthProfit.innerText = "₱" + profit;
+}
 /* =======================
 INIT (IMPORTANT)
 ======================= */
@@ -1244,26 +1270,6 @@ let inventory = [];
 let receipts = []; // 🔥 ADD THIS
 
 
-function deleteReceipt(index){
-
-Swal.fire({
-title:'Delete receipt?',
-icon:'warning',
-showCancelButton:true,
-confirmButtonText:'Delete'
-}).then((result)=>{
-
-if(result.isConfirmed){
-
-receipts.splice(index,1);
-
-
-updateReceiptHistory();
-
-Swal.fire('Deleted!','','success');
-}
-});
-}
 
 let quotationItems = [];
 
@@ -1285,7 +1291,7 @@ function addQuotationItem() {
   });
 
 renderQuotation();
-updateQuotationHeader();
+
 
   // clear inputs
   document.getElementById("qItem").value = "";
@@ -1514,7 +1520,7 @@ document.addEventListener("DOMContentLoaded", function(){
   if (qDate) qDate.value = now;
   if (qDateText) qDateText.innerText = now;
 
-  updateReceiptHistory();
+renderReceiptHistory();
   updateDashboard();
   renderWeekly();
   renderExpenses();
