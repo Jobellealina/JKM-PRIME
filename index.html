@@ -32,7 +32,33 @@ body{
 }
 
 
+/* LOADING SCREEN */
 
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  background:#0b1f4d;
+  z-index:99999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  transition:.5s;
+}
+
+.loader-box{
+  text-align:center;
+  color:white;
+}
+
+.loader-box h3{
+  font-weight:bold;
+  margin:0;
+}
+
+.loader-box p{
+  opacity:.8;
+}
 .sidebar{
   width:260px;
   height:100vh;
@@ -226,6 +252,17 @@ class="rounded-circle shadow mb-2">
 
 </div>
 
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="loader-box">
+    <img src="logo.png" width="90" class="mb-3">
+
+    <h3>JKM PRIME</h3>
+    <p>Loading System...</p>
+
+    <div class="spinner-border text-light mt-2"></div>
+  </div>
+</div>
 <!-- DASHBOARD -->
 
 <div id="dashboardSection" class="section active">
@@ -788,10 +825,30 @@ JKM PRIME DIGITAL PRINTS</p>
 </div>
 
 <script>
-    if(localStorage.getItem("loggedIn") !== "true"){
-    window.location.href = "login.html";
-}
+window.addEventListener("load", ()=>{
 
+  // show loading first
+  setTimeout(()=>{
+
+    // check login
+    if(localStorage.getItem("loggedIn") !== "true"){
+
+      window.location.href = "login.html";
+
+    }else{
+
+      // hide loading
+      document.getElementById("loadingScreen").style.opacity = "0";
+
+      setTimeout(()=>{
+        document.getElementById("loadingScreen").style.display = "none";
+      },500);
+
+    }
+
+  },2000); // 2 seconds loading
+
+});
 function logout(){
     localStorage.removeItem("loggedIn");
     window.location.href = "login.html";
