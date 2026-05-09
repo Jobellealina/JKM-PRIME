@@ -15,8 +15,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
 
@@ -962,7 +962,7 @@ function addExpense(){
     expenses.push(expense);
 
     // 🔥 SAVE TO FIREBASE (ADD MODE)
-    db.ref("expenses").set(expenses);
+    db.ref("expenses").push(expense);
 
     Swal.fire('Success','Expense added','success');
 
@@ -1053,6 +1053,9 @@ Swal.fire('Deleted!','','success');
 
 }
 
+let weeklyReports = [];
+let expenses = [];
+let inventory = [];
 /* =======================
 INVENTORY CRUD
 ======================= */
