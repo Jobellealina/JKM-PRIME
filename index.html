@@ -32,20 +32,7 @@ body{
     #c9d4ff);
 }
 
-.status-dropdown.paid {
-  background:#198754;
-  color:white;
-}
 
-.status-dropdown.unpaid {
-  background:#dc3545;
-  color:white;
-}
-
-.status-dropdown.settled {
-  background:#0d6efd;
-  color:white;
-}
 /* LOADING SCREEN */
 
 /* CMYK LOADING */
@@ -2435,15 +2422,6 @@ function updateEquipmentSummary() {
 }
 let equipment = [];
 let equipmentEditId = null;
-
-document.addEventListener("change", function(e){
-  if(e.target.classList.contains("status-dropdown")){
-
-    e.target.classList.remove("paid","unpaid","settled");
-    e.target.classList.add(e.target.value);
-
-  }
-});
 </script>
 
 </body>
