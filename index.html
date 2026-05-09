@@ -1021,6 +1021,9 @@ Mark reviews this every end of month.
 </div>
 
 <script>
+    let lastMonth = new Date().getMonth();
+let lastYear = new Date().getFullYear();
+
 window.addEventListener("load", ()=>{
 
   const loading = document.getElementById("loadingScreen");
@@ -1790,6 +1793,8 @@ renderReceiptHistory();
 loadExpensesFromFirebase();
 loadInventoryFromFirebase();
 loadReceiptsFromFirebase();
+setInterval(checkMonthChange, 60000); 
+checkMonthChange();
 
 });
 document.getElementById("menuToggle").addEventListener("click", function () {
@@ -2000,6 +2005,47 @@ function updateMonthlySummary(){
 
   document.getElementById("yearJobelle").innerText =
     "₱" + yearShare.toFixed(2);
+}
+
+function checkMonthChange() {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  if (currentMonth !== lastMonth || currentYear !== lastYear) {
+
+    // 🔥 SAVE CURRENT MONTH SUMMARY (optional)
+    db.ref("monthlyArchive").push({
+      month: lastMonth,
+      year: lastYear,
+      timestamp: new Date().toISOString(),
+      data: {
+        weeklyReports,
+        expenses,
+        receipts
+      }
+    });
+
+    // 🔥 RESET DATA FOR NEW MONTH
+    weeklyReports = [];
+    expenses = [];
+    receipts = [];
+
+    // OPTIONAL: clear Firebase current data
+    db.ref("weeklyReports").remove();
+    db.ref("expenses").remove();
+    db.ref("receipts").remove();
+
+    // update tracker
+    lastMonth = currentMonth;
+    lastYear = currentYear;
+
+    // refresh UI
+    updateDashboard();
+    updateMonthlySummary();
+
+    Swal.fire("New Month Started", "Monthly data reset completed", "success");
+  }
 }
 </script>
 
