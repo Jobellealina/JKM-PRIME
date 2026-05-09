@@ -1825,6 +1825,7 @@ db.ref("weeklyReports").on("value", snap => {
   weeklyReports = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
   renderWeekly();
   updateDashboard();
+  updateMonthlySummary();
 });
 }
 
@@ -1843,6 +1844,7 @@ function loadExpensesFromFirebase() {
   expenses = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
   renderExpenses();
   updateDashboard();
+  updateMonthlySummary();
 });
 }
 
@@ -1874,59 +1876,133 @@ db.ref("receipts").on("value", snap => {
   receipts = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
   renderReceiptHistory(receipts);
   updateDashboard();
+  updateMonthlySummary();
 });
 }
 function updateMonthlySummary(){
 
-  const sales =
-    weeklyReports.reduce((a,b)=>a + (Number(b.sales)||0),0);
+  const months = [
+    "January","February","March","April",
+    "May","June","July","August",
+    "September","October","November","December"
+  ];
 
-  const expensesTotal =
-    weeklyReports.reduce((a,b)=>a + (Number(b.expenses)||0),0) +
-    expenses.reduce((a,b)=>a + (Number(b.amount)||0),0);
+  let yearSales = 0;
+  let yearExpenses = 0;
+  let yearProfit = 0;
 
-  const profit = sales - expensesTotal;
+  // RESET TABLE
+  const rows = document.querySelectorAll("#monthlySummaryTable tr");
 
-  // Equal share
-  const share = profit / 3;
+  rows.forEach((row, index)=>{
 
-  // JAN SAMPLE
-  document.getElementById("janSales").innerText =
-    "₱" + sales.toFixed(2);
+    let sales = 0;
+    let expensesTotal = 0;
 
-  document.getElementById("janExpenses").innerText =
-    "₱" + expensesTotal.toFixed(2);
+    // WEEKLY REPORTS
+    weeklyReports.forEach(r=>{
 
-  document.getElementById("janProfit").innerText =
-    "₱" + profit.toFixed(2);
+      if(!r.period) return;
 
-  document.getElementById("janMark").innerText =
-    "₱" + share.toFixed(2);
+      const period = r.period.toLowerCase();
 
-  document.getElementById("janKaye").innerText =
-    "₱" + share.toFixed(2);
+      if(period.includes(months[index].toLowerCase())){
 
-  document.getElementById("janJobelle").innerText =
-    "₱" + share.toFixed(2);
+        sales += Number(r.sales || 0);
 
-  // YEAR TOTAL
+        expensesTotal += Number(r.expenses || 0);
+      }
+
+    });
+
+    // EXPENSE LOG
+    expenses.forEach(e=>{
+
+      if(!e.date) return;
+
+      const d = new Date(e.date);
+
+      if(d.getMonth() === index){
+
+        expensesTotal += Number(e.amount || 0);
+
+      }
+
+    });
+
+    // RECEIPTS
+    receipts.forEach(r=>{
+
+      if(!r.date) return;
+
+      const d = new Date(r.date);
+
+      if(d.getMonth() === index){
+
+        const total =
+          (r.items || []).reduce(
+            (a,b)=>a + Number(b.total || 0),
+            0
+          );
+
+        sales += total;
+
+      }
+
+    });
+
+    const profit = sales - expensesTotal;
+
+    const markShare = profit / 3;
+    const kayeShare = profit / 3;
+    const jobelleShare = profit / 3;
+
+    // UPDATE TABLE
+    row.cells[1].innerText =
+      "₱" + sales.toFixed(2);
+
+    row.cells[2].innerText =
+      "₱" + expensesTotal.toFixed(2);
+
+    row.cells[3].innerText =
+      "₱" + profit.toFixed(2);
+
+    row.cells[4].innerText =
+      "₱" + markShare.toFixed(2);
+
+    row.cells[5].innerText =
+      "₱" + kayeShare.toFixed(2);
+
+    row.cells[6].innerText =
+      "₱" + jobelleShare.toFixed(2);
+
+    // YEAR TOTALS
+    yearSales += sales;
+    yearExpenses += expensesTotal;
+    yearProfit += profit;
+
+  });
+
+  // TOTAL SHARES
+  const yearShare = yearProfit / 3;
+
   document.getElementById("yearSales").innerText =
-    "₱" + sales.toFixed(2);
+    "₱" + yearSales.toFixed(2);
 
   document.getElementById("yearExpenses").innerText =
-    "₱" + expensesTotal.toFixed(2);
+    "₱" + yearExpenses.toFixed(2);
 
   document.getElementById("yearProfit").innerText =
-    "₱" + profit.toFixed(2);
+    "₱" + yearProfit.toFixed(2);
 
   document.getElementById("yearMark").innerText =
-    "₱" + share.toFixed(2);
+    "₱" + yearShare.toFixed(2);
 
   document.getElementById("yearKaye").innerText =
-    "₱" + share.toFixed(2);
+    "₱" + yearShare.toFixed(2);
 
   document.getElementById("yearJobelle").innerText =
-    "₱" + share.toFixed(2);
+    "₱" + yearShare.toFixed(2);
 }
 </script>
 
