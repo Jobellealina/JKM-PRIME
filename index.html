@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JKM Prime Digital Prints</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="logo.png">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
+<style>
+
+body{
+  background:#f4f7fb;
+  font-family:monospace;
+  overflow-x:hidden;
+   background: linear-gradient(
+    135deg,
+    #e8eaff,
+    #d6dcff,
+    #e3e8ff,
+    #c9d4ff);
+}
+
+.sidebar{
+  width:260px;
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  background:#0b1f4d;
+  color:#fff;
+  padding-top:20px;
+}
+
+.sidebar a{
+  display:block;
+  color:white;
+  padding:14px 20px;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+  background:rgba(255,255,255,.2);
+  border-left:4px solid #fff;
+}
+
+.main-content{
+  margin-left:260px;
+  padding:20px;
+}
+
+.card-box{
+  border-radius:16px;
+  padding:20px;
+  color:white;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+
+.bg-sales{
+  background:linear-gradient(45deg,#198754,#20c997);
+}
+
+.bg-expense{
+  background:linear-gradient(45deg,#dc3545,#fd7e14);
+}
+
+.bg-profit{
+  background:linear-gradient(45deg,#0d6efd,#6610f2);
+}
+
+.bg-stock{
+  background:linear-gradient(45deg,#6f42c1,#d63384);
+}
+
+.section{
+  display:none;
+}
+
+.section.active{
+  display:block;
+}
+
+.table thead{
+  background:#0b1f4d;
+  color:white;
+}
+
+.badge-low{
+  background:#ffc107;
+  color:black;
+}
+
+.badge-ok{
+  background:#198754;
+}
+
+.badge-out{
+  background:#dc3545;
+}
+
+.topbar{
+  background:white;
+  padding:15px 20px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+@media(max-width:768px){
+
+  .sidebar{
+    width:260px;
+    left:-260px;
+    z-index:999;
+    transition:.3s;
+  }
+
+  .sidebar.show{
+    left:0;
+  }
+
+  .main-content{
+    margin-left:0;
+  }
+
+  #menuToggle{
+    position:fixed;
+    top:10px;
+    left:10px;
+    z-index:1000;
+  }
+
+  .topbar{
+    margin-top:60px;
+  }
+
+}
+
+@media(min-width:769px){
+  #menuToggle{
+    display:none;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<button class="btn btn-dark d-md-none m-3" id="menuToggle">
+<i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+
+<div class="text-center mb-4">
+<img src="logo.png"
+width="80"
+class="rounded-circle shadow mb-2">
+
+<h4 class="fw-bold">JKM PRIME</h4>
+<small>DIGITAL PRINTS</small>
+</div>
+
+<a href="#" class="nav-link active" data-section="dashboardSection">
+<i class="fa-solid fa-gauge"></i> Dashboard
+</a>
+
+<a href="#" class="nav-link" data-section="weeklySection">
+<i class="fa-solid fa-calendar-week"></i> Weekly Report
+</a>
+
+<a href="#" class="nav-link" data-section="expenseSection">
+<i class="fa-solid fa-wallet"></i> Expense Log
+</a>
+
+<a href="#" class="nav-link" data-section="inventorySection">
+<i class="fa-solid fa-boxes-stacked"></i> Inventory
+</a>
+
+<a href="#" class="nav-link" data-section="monthlySection">
+<i class="fa-solid fa-chart-pie"></i> Monthly Summary
+</a>
+<a href="#" class="nav-link" data-section="receiptSection">
+<i class="fa-solid fa-receipt"></i> Receipt
+</a>
+
+<a href="#" class="nav-link" data-section="receiptHistorySection">
+<i class="fa-solid fa-clock-rotate-left"></i> Receipt History
+</a>
+
+<a href="#" class="nav-link" data-section="quotationSection">
+<i class="fa-solid fa-file-invoice"></i> Quotation
+</a>
+<a href="tracking.html" class="nav-link" onclick="window.location.href='tracking.html'">
+<i class="fa-solid fa-file-invoice"></i> Tracking
+</a>
+<a href="#" onclick="logout()">
+<i class="fa fa-right-from-bracket"></i> Logout
+</a>
+
+</div>
+
+<div class="main-content">
+
+<div class="topbar d-flex justify-content-between align-items-center">
+<div>
+<h4 class="mb-0">JKM Prime Digital Prints</h4>
+<small>Business Tracking System</small>
+</div>
+
+<button class="btn btn-primary" onclick="exportData()">
+<i class="fa-solid fa-download"></i> Export Backup
+</button>
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboardSection" class="section active">
+
+<div class="row g-4 mb-4">
+
+<div class="col-md-3">
+<div class="card-box bg-sales">
+<h6>Total Sales</h6>
+<h2 id="totalSales">₱0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box bg-expense">
+<h6>Total Expenses</h6>
+<h2 id="totalExpenses">₱0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box bg-profit">
+<h6>Net Profit</h6>
+<h2 id="totalProfit">₱0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box bg-stock">
+<h6>Inventory Items</h6>
+<h2 id="inventoryCount">0</h2>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- WEEKLY -->
+
+<div id="weeklySection" class="section">
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card-body">
+
+<h4>Add Weekly Report</h4>
+
+<div class="row g-3">
+
+<div class="col-md-3">
+<input type="text" id="weekPeriod" class="form-control" placeholder="Week Period">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="weekSales" class="form-control" placeholder="Sales">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="weekExpenses" class="form-control" placeholder="Expenses">
+</div>
+
+<div class="col-md-2">
+<button class="btn btn-success w-100" onclick="addWeeklyReport()">
+<i class="fa-solid fa-plus"></i> Add
+</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+<div class="card-body">
+
+<div class="table-responsive">
+
+<table class="table table-bordered align-middle">
+
+<thead>
+<tr>
+<th>#</th>
+<th>Week</th>
+<th>Sales</th>
+<th>Expenses</th>
+<th>Profit</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="weeklyTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<!-- EXPENSE -->
+
+<div id="expenseSection" class="section">
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card-body">
+
+<h4>Add Expense</h4>
+
+<div class="row g-3">
+
+<div class="col-md-2">
+<input type="date" id="expenseDate" class="form-control">
+</div>
+
+<div class="col-md-3">
+<input type="text" id="expenseDesc" class="form-control" placeholder="Description">
+</div>
+
+<div class="col-md-2">
+<input type="text" id="expenseCategory" class="form-control" placeholder="Category">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="expenseAmount" class="form-control" placeholder="Amount">
+</div>
+
+<div class="col-md-2">
+<button class="btn btn-danger w-100" onclick="addExpense()">
+<i class="fa-solid fa-plus"></i> Add
+</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>#</th>
+<th>Date</th>
+<th>Description</th>
+<th>Category</th>
+<th>Amount</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="expenseTable"></tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+<div id="receiptSection" class="section">
+
+  <div class="card shadow-sm p-4">
+    <h4>Generate Receipt</h4>
+
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" id="rName" class="form-control" placeholder="Customer Name">
+      </div>
+
+      <div class="col-md-4">
+        <input type="text" id="rAddress" class="form-control" placeholder="Address">
+      </div>
+
+      <div class="col-md-4">
+        <button class="btn btn-primary w-100" onclick="addReceiptItem()">
+          Add Item
+        </button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" id="rService" class="form-control" placeholder="Service">
+      </div>
+
+      <div class="col-md-2">
+        <input type="number" id="rQty" class="form-control" placeholder="Qty">
+      </div>
+
+      <div class="col-md-3">
+        <input type="number" id="rPrice" class="form-control" placeholder="Price">
+      </div>
+
+      <div class="col-md-3">
+        <button class="btn btn-success w-100" onclick="generateReceipt()">
+          Generate Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="card mt-3 p-4" id="receiptPreviewBox">
+    
+    <h4 class="text-center">JKM PRIME DIGITAL PRINTS</h4>
+    <h5 class="text-center"> RECEIPT</h5>
+
+    <hr>
+
+    <p><b>Name:</b> <span id="pName"></span></p>
+    <p><b>Address:</b> <span id="pAddress"></span></p>
+    <p><b>Date:</b> <span id="pDate"></span></p>
+    <p><b>Receipt No:</b> <span id="pReceiptNo"></span></p>
+
+    <table class="table table-bordered text-center">
+      <thead class="table-light">
+        <tr>
+          <th>No</th>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+<tbody id="receiptTable"></tbody>
+      <tfoot>
+        <tr>
+          <th colspan="4">TOTAL</th>
+          <th id="receiptTotal">₱0</th>
+        </tr>
+      </tfoot>
+    </table>
+
+  </div>
+
+</div>
+
+
+
+<div id="receiptHistorySection" class="section">
+
+  <div class="card p-4">
+    <h4>Receipt History</h4>
+
+    <!-- FILTERS -->
+    <div class="row g-2 mb-3 align-items-end">
+
+  <!-- Name filter -->
+  <div class="col-md-4">
+    <input type="text" id="filterName" class="form-control"
+      placeholder="Filter by customer name"
+      oninput="filterReceipts()">
+  </div>
+
+  <!-- FROM -->
+  <div class="col-md-3">
+    <label class="form-label mb-1">From</label>
+    <input type="month" id="filterFrom" class="form-control"
+      onchange="filterReceipts()">
+  </div>
+
+  <!-- TO -->
+  <div class="col-md-3">
+    <label class="form-label mb-1">To</label>
+    <input type="month" id="filterTo" class="form-control"
+      onchange="filterReceipts()">
+  </div>
+
+  <!-- EXPORT BUTTONS -->
+  <div class="col-md-2 d-flex gap-2">
+    <button class="btn btn-success w-100" onclick="exportToExcel()">
+      Excel
+    </button>
+
+    <button class="btn btn-danger w-100" onclick="exportToPDF()">
+      PDF
+    </button>
+  </div>
+
+</div>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Receipt No</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="receiptHistoryTable"></tbody>
+    </table>
+
+  </div>
+
+</div>
+<div id="quotationSection" class="section">
+
+  <div class="card p-4" id="quotationCard">
+
+    <!-- HEADER -->
+    <div class="text-center">
+      <h4>JKM PRIME DIGITAL PRINTS</h4>
+      <h5>QUOTATION</h5>
+    </div>
+
+    <!-- DISPLAY INFO (IMPORTANT FOR IMAGE) -->
+    <div class="row g-2 mt-2">
+  <div class="col-md-6">
+    <input type="text" id="qTo" class="form-control" placeholder="To (Client Name)">
+  </div>
+
+  <div class="col-md-6">
+    <input type="text" id="qDate" class="form-control" readonly>
+  </div>
+</div>
+
+    <hr>
+
+    <!-- INPUTS -->
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" id="qItem" class="form-control" placeholder="Item">
+      </div>
+
+      <div class="col-md-2">
+        <input type="number" id="qQty" class="form-control" placeholder="Qty">
+      </div>
+
+      <div class="col-md-3">
+        <input type="number" id="qPrice" class="form-control" placeholder="Unit Price">
+      </div>
+
+      <div class="col-md-3">
+        <button type="button" class="btn btn-success w-100" onclick="addQuotationItem()">
+          Add Item
+        </button>
+
+        <button class="btn btn-primary w-100 mt-2" onclick="saveQuotationImage()">
+          Save as Image
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-bordered text-center mt-3">
+      <thead class="table-light">
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+
+      <tbody id="quotationTable"></tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <h5 class="text-end">Total: ₱<span id="grandTotal">0</span></h5>
+
+    <hr>
+
+    <!-- FOOTER TEXT -->
+    <small>
+      Thank you for choosing JKM PRIME DIGITAL PRINTS . This quotation includes the items listed above.<br><br>
+
+Terms & Conditions:
+
+50% downpayment required to confirm order
+Remaining balance upon delivery / pick-up
+Production starts after downpayment<br><br>
+Sincerely,
+JKM PRIME DIGITAL PRINTS
+    </small>
+
+  </div>
+</div>
+<div id="quotationPrint" style="
+  display:none;
+  width:105mm;
+  height:148mm;
+  padding:10mm;
+  font-family:Arial;
+  color:black;
+  background:white;
+">
+
+  <h5 style="text-align:center;">JKM PRIME DIGITAL PRINTS</h5>
+  <h5 style="text-align:center;">QUOTATION</h5>
+
+  <hr>
+  <br>
+
+  <p><b>To:</b> <span id="pTo"></span></p>
+  <p><b>Date:</b> <span id="pDate"></span></p>
+<br>
+  <table width="100%" cellspacing="0" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+
+    <tbody id="pQuotationTable"></tbody>
+  </table>
+<br>
+  <h5 style="text-align:right;">Total: ₱<span id="pTotal"></span></h5>
+
+  <br>
+  <p style="text-align:left; font-size: 10px;" >Thank you for choosing JKM PRIME DIGITAL PRINTS . This quotation includes the items listed above.<br><br>
+
+Terms & Conditions:
+
+50% downpayment required to confirm order
+Remaining balance upon delivery / pick-up
+Production starts after downpayment<br><br>
+Sincerely,
+JKM PRIME DIGITAL PRINTS</p>
+
+</div>
+<!-- INVENTORY -->
+<div id="inventorySection" class="section">
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card-body">
+
+<h4>Add Inventory</h4>
+
+<div class="row g-3">
+
+<div class="col-md-3">
+<input type="text" id="itemName" class="form-control" placeholder="Item Name">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="itemQty" class="form-control" placeholder="Quantity">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="itemMin" class="form-control" placeholder="Min Qty">
+</div>
+
+<div class="col-md-2">
+<input type="number" id="itemCost" class="form-control" placeholder="Cost">
+</div>
+
+<div class="col-md-2">
+<button class="btn btn-primary w-100" onclick="addInventory()">
+<i class="fa-solid fa-plus"></i> Add
+</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- TABLE -->
+<div class="card border-0 shadow-sm rounded-4">
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Qty</th>
+<th>Min</th>
+<th>Cost</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="inventoryTable"></tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="modal fade" id="inventoryModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="inventoryModalTitle">Edit Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input type="text" id="modalItemName" class="form-control mb-2" placeholder="Item Name">
+        <input type="number" id="modalItemQty" class="form-control mb-2" placeholder="Quantity">
+        <input type="number" id="modalItemMin" class="form-control mb-2" placeholder="Min Qty">
+        <input type="number" id="modalItemCost" class="form-control" placeholder="Cost">
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveInventory()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY -->
+
+<div id="monthlySection" class="section">
+
+<div class="card border-0 shadow-sm rounded-4">
+<div class="card-body">
+
+<h4>Monthly Summary</h4>
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>Total Sales</th>
+<th>Total Expenses</th>
+<th>Net Profit</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td id="monthSales">₱0</td>
+<td id="monthExpenses">₱0</td>
+<td id="monthProfit">₱0</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+    if(localStorage.getItem("loggedIn") !== "true"){
+    window.location.href = "login.html";
+}
+
+function logout(){
+    localStorage.removeItem("loggedIn");
+    window.location.href = "login.html";
+}
+let weeklyReports = JSON.parse(localStorage.getItem('weeklyReports')) || [];
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+
+/* =======================
+NAVIGATION
+======================= */
+
+document.querySelectorAll('.nav-link').forEach(link=>{
+
+link.addEventListener('click',function(e){
+
+e.preventDefault();
+
+document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+this.classList.add('active');
+
+document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+
+document.getElementById(this.dataset.section).classList.add('active');
+
+});
+
+});
+
+
+
+/* =======================
+WEEKLY CRUD
+======================= */
+
+let weeklyEditIndex = -1;
+
+function addWeeklyReport(){
+
+const period = document.getElementById('weekPeriod').value;
+const sales = parseFloat(document.getElementById('weekSales').value) || 0;
+const expensesValue = parseFloat(document.getElementById('weekExpenses').value) || 0;
+
+if(!period){
+
+Swal.fire('Error','Please enter week period','error');
+return;
+
+}
+
+const data = {
+period,
+sales,
+expenses:expensesValue,
+profit:sales-expensesValue
+};
+
+if(weeklyEditIndex === -1){
+
+weeklyReports.push(data);
+
+Swal.fire('Success','Weekly report added','success');
+
+}else{
+
+weeklyReports[weeklyEditIndex] = data;
+
+Swal.fire('Updated','Weekly report updated','success');
+
+weeklyEditIndex = -1;
+
+}
+
+saveData();
+renderWeekly();
+updateDashboard();
+
+document.getElementById('weekPeriod').value='';
+document.getElementById('weekSales').value='';
+document.getElementById('weekExpenses').value='';
+
+}
+
+function renderWeekly(){
+
+const table = document.getElementById('weeklyTable');
+
+table.innerHTML='';
+
+weeklyReports.forEach((r,index)=>{
+
+table.innerHTML += `
+<tr>
+<td>${index+1}</td>
+<td>${r.period}</td>
+<td>₱${r.sales.toLocaleString()}</td>
+<td>₱${r.expenses.toLocaleString()}</td>
+<td>₱${r.profit.toLocaleString()}</td>
+
+<td>
+
+<button class="btn btn-warning btn-sm"
+onclick="editWeekly(${index})">
+<i class="fa-solid fa-pen"></i>
+</button>
+
+<button class="btn btn-danger btn-sm"
+onclick="deleteWeekly(${index})">
+<i class="fa-solid fa-trash"></i>
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+function editWeekly(index){
+
+const r = weeklyReports[index];
+
+document.getElementById('weekPeriod').value = r.period;
+document.getElementById('weekSales').value = r.sales;
+document.getElementById('weekExpenses').value = r.expenses;
+
+weeklyEditIndex = index;
+
+}
+
+function deleteWeekly(index){
+
+Swal.fire({
+title:'Delete report?',
+icon:'warning',
+showCancelButton:true,
+confirmButtonText:'Delete'
+}).then((result)=>{
+
+if(result.isConfirmed){
+
+weeklyReports.splice(index,1);
+
+saveData();
+renderWeekly();
+updateDashboard();
+
+Swal.fire('Deleted!','','success');
+
+}
+
+});
+
+}
+
+/* =======================
+EXPENSE CRUD
+======================= */
+
+let expenseEditIndex = -1;
+
+function addExpense(){
+
+const expense = {
+date:document.getElementById('expenseDate').value,
+desc:document.getElementById('expenseDesc').value,
+category:document.getElementById('expenseCategory').value,
+amount:parseFloat(document.getElementById('expenseAmount').value) || 0
+};
+
+if(expenseEditIndex === -1){
+
+expenses.push(expense);
+
+Swal.fire('Success','Expense added','success');
+
+}else{
+
+expenses[expenseEditIndex] = expense;
+
+Swal.fire('Updated','Expense updated','success');
+
+expenseEditIndex = -1;
+
+}
+
+saveData();
+renderExpenses();
+updateDashboard();
+
+document.getElementById('expenseDate').value='';
+document.getElementById('expenseDesc').value='';
+document.getElementById('expenseCategory').value='';
+document.getElementById('expenseAmount').value='';
+
+}
+
+function renderExpenses(){
+
+const table = document.getElementById('expenseTable');
+
+table.innerHTML='';
+
+expenses.forEach((e,index)=>{
+
+table.innerHTML += `
+<tr>
+
+<td>${index+1}</td>
+<td>${e.date}</td>
+<td>${e.desc}</td>
+<td>${e.category}</td>
+<td>₱${e.amount.toLocaleString()}</td>
+
+<td>
+
+<button class="btn btn-warning btn-sm"
+onclick="editExpense(${index})">
+<i class="fa-solid fa-pen"></i>
+</button>
+
+<button class="btn btn-danger btn-sm"
+onclick="deleteExpense(${index})">
+<i class="fa-solid fa-trash"></i>
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+function editExpense(index){
+
+const e = expenses[index];
+
+document.getElementById('expenseDate').value=e.date;
+document.getElementById('expenseDesc').value=e.desc;
+document.getElementById('expenseCategory').value=e.category;
+document.getElementById('expenseAmount').value=e.amount;
+
+expenseEditIndex = index;
+
+}
+
+function deleteExpense(index){
+
+Swal.fire({
+title:'Delete expense?',
+icon:'warning',
+showCancelButton:true,
+confirmButtonText:'Delete'
+}).then((result)=>{
+
+if(result.isConfirmed){
+
+expenses.splice(index,1);
+
+saveData();
+renderExpenses();
+updateDashboard();
+
+Swal.fire('Deleted!','','success');
+
+}
+
+});
+
+}
+
+/* =======================
+INVENTORY CRUD
+======================= */
+
+let inventoryEditIndex = -1;
+
+/* ADD INVENTORY */
+function addInventory(){
+
+const item = {
+  name: document.getElementById('itemName').value.trim(),
+  qty: Number(document.getElementById('itemQty').value) || 0,
+  min: Number(document.getElementById('itemMin').value) || 0,
+  cost: Number(document.getElementById('itemCost').value) || 0
+};
+
+if(!item.name){
+  Swal.fire('Error','Item name required','error');
+  return;
+}
+
+inventory.push(item);
+
+saveData();
+renderInventory();
+updateDashboard();
+
+document.getElementById('itemName').value='';
+document.getElementById('itemQty').value='';
+document.getElementById('itemMin').value='';
+document.getElementById('itemCost').value='';
+}
+
+
+/* RENDER INVENTORY (MISSING BEFORE → FIXED) */
+function renderInventory(){
+
+const table = document.getElementById('inventoryTable');
+table.innerHTML = '';
+
+inventory.forEach((i,index)=>{
+
+let status = '';
+let badge = '';
+
+if(i.qty <= 0){
+  status = "Out of Stock";
+  badge = "badge-out";
+}else if(i.qty <= i.min){
+  status = "Low Stock";
+  badge = "badge-low";
+}else{
+  status = "OK";
+  badge = "badge-ok";
+}
+
+table.innerHTML += `
+<tr>
+<td>${index+1}</td>
+<td>${i.name}</td>
+<td>${i.qty}</td>
+<td>${i.min}</td>
+<td>₱${i.cost.toLocaleString()}</td>
+<td><span class="badge ${badge}">${status}</span></td>
+<td>
+  <button class="btn btn-warning btn-sm" onclick="editInventory(${index})">
+    <i class="fa-solid fa-pen"></i>
+  </button>
+  <button class="btn btn-danger btn-sm" onclick="deleteInventory(${index})">
+    <i class="fa-solid fa-trash"></i>
+  </button>
+</td>
+</tr>
+`;
+});
+}
+
+
+/* EDIT */
+function editInventory(index){
+
+inventoryEditIndex = index;
+
+const i = inventory[index];
+
+document.getElementById('inventoryModalTitle').innerText = "Edit Inventory";
+
+document.getElementById('modalItemName').value = i.name;
+document.getElementById('modalItemQty').value = i.qty;
+document.getElementById('modalItemMin').value = i.min;
+document.getElementById('modalItemCost').value = i.cost;
+
+new bootstrap.Modal(document.getElementById('inventoryModal')).show();
+}
+
+
+/* SAVE EDIT */
+function saveInventory(){
+
+const item = {
+  name: document.getElementById('modalItemName').value.trim(),
+  qty: Number(document.getElementById('modalItemQty').value) || 0,
+  min: Number(document.getElementById('modalItemMin').value) || 0,
+  cost: Number(document.getElementById('modalItemCost').value) || 0
+};
+
+inventory[inventoryEditIndex] = item;
+
+saveData();
+renderInventory();
+updateDashboard();
+
+bootstrap.Modal.getInstance(document.getElementById('inventoryModal')).hide();
+}
+
+
+/* DELETE */
+function deleteInventory(index){
+
+Swal.fire({
+title:'Delete item?',
+icon:'warning',
+showCancelButton:true,
+confirmButtonText:'Delete'
+}).then((result)=>{
+
+if(result.isConfirmed){
+inventory.splice(index,1);
+saveData();
+renderInventory();
+updateDashboard();
+Swal.fire('Deleted!','','success');
+}
+
+});
+
+}
+
+/* =======================
+DASHBOARD
+======================= */
+
+function updateDashboard(){
+
+const weeklySales = weeklyReports.reduce((sum,r)=>sum + r.sales,0);
+
+// 🔥 ADD RECEIPTS SALES
+const receiptSales = JSON.parse(localStorage.getItem("receipts") || "[]")
+.reduce((sum,r)=>{
+  return sum + r.items.reduce((s,i)=>s + i.total,0);
+},0);
+
+const sales = weeklySales + receiptSales;
+
+const weeklyExpenses = weeklyReports.reduce((sum,r)=>sum + r.expenses,0);
+const expenseLogTotal = expenses.reduce((sum,e)=>sum + e.amount,0);
+
+const totalExpenses = weeklyExpenses + expenseLogTotal;
+
+const profit = sales - totalExpenses;
+
+document.getElementById('totalSales').innerText='₱'+sales.toLocaleString();
+document.getElementById('totalExpenses').innerText='₱'+totalExpenses.toLocaleString();
+document.getElementById('totalProfit').innerText='₱'+profit.toLocaleString();
+
+document.getElementById('inventoryCount').innerText=inventory.length;
+
+document.getElementById('monthSales').innerText='₱'+sales.toLocaleString();
+document.getElementById('monthExpenses').innerText='₱'+totalExpenses.toLocaleString();
+document.getElementById('monthProfit').innerText='₱'+profit.toLocaleString();
+
+}
+
+/* =======================
+SAVE
+======================= */
+
+function saveData(){
+
+localStorage.setItem('weeklyReports',JSON.stringify(weeklyReports));
+
+localStorage.setItem('expenses',JSON.stringify(expenses));
+
+localStorage.setItem('inventory',JSON.stringify(inventory));
+
+}
+
+/* =======================
+EXPORT
+======================= */
+
+function exportData(){
+
+const data = {
+weeklyReports,
+expenses,
+inventory
+};
+
+const blob = new Blob(
+[JSON.stringify(data,null,2)],
+{type:'application/json'}
+);
+
+const link = document.createElement('a');
+
+link.href = URL.createObjectURL(blob);
+
+link.download = 'JKM_Backup.json';
+
+link.click();
+
+Swal.fire('Exported','Backup downloaded','success');
+
+}
+let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+let receiptItems = [];
+receiptItems = [];
+
+function addReceiptItem(){
+  const service = document.getElementById("rService").value;
+  const qty = Number(document.getElementById("rQty").value);
+  const price = Number(document.getElementById("rPrice").value);
+
+  if(!service || qty <= 0 || price <= 0){
+    Swal.fire("Error","Complete item details","error");
+    return;
+  }
+
+  receiptItems.push({
+    service,
+    qty,
+    price,
+    total: qty * price
+  });
+
+  showReceiptPreview();
+}
+
+
+
+
+function showReceipt(r){
+
+document.getElementById("pName").innerText = r.name;
+document.getElementById("pAddress").innerText = r.address;
+document.getElementById("pDate").innerText = r.date;
+document.getElementById("pReceiptNo").innerText = r.receiptNo;
+
+let table = document.getElementById("receiptTable");
+table.innerHTML = "";
+
+let total = 0;
+
+r.items.forEach((i, index)=>{
+
+total += i.total;
+
+table.innerHTML += `
+<tr>
+<td>${index+1}</td>
+<td>${i.service}</td>
+<td>${i.qty}</td>
+<td>₱${i.price}</td>
+<td>₱${i.total}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("receiptTotal").innerText = "₱" + total;
+}
+function generateReceipt(){
+
+const name = document.getElementById("rName").value;
+const address = document.getElementById("rAddress").value;
+
+if(!name){
+Swal.fire("Error","Enter customer name","error");
+return;
+}
+
+const receiptNo = "JKM" + Math.floor(100000 + Math.random() * 900000);
+
+let receipt = {
+receiptNo,
+name,
+address,
+date: new Date().toLocaleString(),
+items: receiptItems
+};
+
+let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+receipts.push(receipt);
+
+localStorage.setItem("receipts", JSON.stringify(receipts));
+
+showReceipt(receipt);
+updateReceiptHistory(); // ✅ important
+
+receiptItems = []; // reset
+updateDashboard();
+Swal.fire("Success","Receipt generated","success");
+
+}
+function updateReceiptHistory(){
+
+let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+
+let table = document.getElementById("receiptHistoryTable");
+table.innerHTML = "";
+
+receipts.forEach((r,index)=>{
+table.innerHTML += `
+<tr>
+<td>${r.receiptNo}</td>
+<td>${r.name}</td>
+<td>${r.date}</td>
+<td>₱${r.items.reduce((sum,i)=>sum+i.total,0)}</td>
+<td>
+  <button onclick="deleteReceipt(${index})" class="btn btn-danger btn-sm">
+    Delete
+  </button>
+</td>
+</tr>
+`;
+});
+
+}
+function deleteReceipt(index){
+
+Swal.fire({
+title:'Delete receipt?',
+icon:'warning',
+showCancelButton:true,
+confirmButtonText:'Delete'
+}).then((result)=>{
+
+if(result.isConfirmed){
+
+let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+receipts.splice(index,1);
+
+localStorage.setItem("receipts", JSON.stringify(receipts));
+
+updateReceiptHistory();
+
+Swal.fire('Deleted!','','success');
+}
+});
+}
+
+let quotationItems = [];
+
+function addQuotationItem() {
+  const item = document.getElementById("qItem").value.trim();
+  const qty = Number(document.getElementById("qQty").value);
+  const price = Number(document.getElementById("qPrice").value);
+
+  if (!item || qty <= 0 || price <= 0) {
+    Swal.fire("Error", "Complete quotation details", "error");
+    return;
+  }
+
+  quotationItems.push({
+    item,
+    qty,
+    price,
+    total: qty * price
+  });
+
+renderQuotation();
+updateQuotationHeader();
+
+  // clear inputs
+  document.getElementById("qItem").value = "";
+  document.getElementById("qQty").value = "";
+  document.getElementById("qPrice").value = "";
+}
+
+function renderQuotation() {
+  const table = document.getElementById("quotationTable");
+  if (!table) return;
+
+  table.innerHTML = "";
+
+  let total = 0;
+
+  quotationItems.forEach((i) => {
+    total += i.total;
+
+    table.innerHTML += `
+      <tr>
+        <td>${i.item}</td>
+        <td>${i.qty}</td>
+        <td>₱${i.price}</td>
+        <td>₱${i.total}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("grandTotal").innerText = total;
+}
+
+function renderReceiptHistory(receipts){
+
+let table = document.getElementById("receiptHistoryTable");
+table.innerHTML = "";
+
+receipts.forEach((r,index)=>{
+
+let total = r.items.reduce((sum,i)=>sum+i.total,0);
+
+table.innerHTML += `
+<tr>
+<td>${r.receiptNo}</td>
+<td>${r.name}</td>
+<td>${r.date}</td>
+<td>₱${total}</td>
+<td>
+  <button onclick="deleteReceipt(${index})" class="btn btn-danger btn-sm">
+    Delete
+  </button>
+</td>
+</tr>
+`;
+
+});
+
+}
+function saveQuotationImage(){
+
+  document.getElementById("pTo").innerText =
+    document.getElementById("qTo").value || "";
+
+  const now = new Date().toLocaleString();
+  document.getElementById("pDate").innerText = now;
+
+  let table = document.getElementById("pQuotationTable");
+  table.innerHTML = "";
+
+  let total = 0;
+
+  quotationItems.forEach(i => {
+    total += i.total;
+
+    table.innerHTML += `
+      <tr>
+        <td>${i.item}</td>
+        <td>${i.qty}</td>
+        <td>${i.price}</td>
+        <td>${i.total}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("pTotal").innerText = total;
+
+  const element = document.getElementById("quotationPrint");
+  element.style.display = "block";
+
+  html2canvas(element, {
+    scale: 2, // 🔥 improves quality for print
+    useCORS: true
+  }).then(canvas => {
+
+    element.style.display = "none";
+
+    const link = document.createElement("a");
+    link.download = "quotation_A6.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    Swal.fire("Saved","A6 quotation downloaded","success");
+
+  });
+
+}
+
+function updateQuotationHeader(){
+
+  const now = new Date().toLocaleString(); // auto date + time
+
+  document.getElementById("qDateText").innerText = now;
+
+  document.getElementById("qToText").innerText =
+    document.getElementById("qTo").value || "N/A";
+}
+
+
+/* =======================
+INITIALIZE
+======================= */
+function filterReceipts(){
+
+let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+
+const nameFilter = document.getElementById("filterName").value.toLowerCase();
+const fromMonth = document.getElementById("filterFrom").value;
+const toMonth = document.getElementById("filterTo").value;
+
+let filtered = receipts.filter(r => {
+
+  let matchName = r.name.toLowerCase().includes(nameFilter);
+
+  let date = new Date(r.date);
+  let yearMonth = date.toISOString().slice(0,7);
+
+  let matchFrom = true;
+  let matchTo = true;
+
+  if(fromMonth){
+    matchFrom = yearMonth >= fromMonth;
+  }
+
+  if(toMonth){
+    matchTo = yearMonth <= toMonth;
+  }
+
+  return matchName && matchFrom && matchTo;
+});
+
+renderReceiptHistory(filtered);
+}
+
+function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+
+  // Weekly Reports
+  const weeklySheet = XLSX.utils.json_to_sheet(weeklyReports);
+  XLSX.utils.book_append_sheet(wb, weeklySheet, "Weekly Reports");
+
+  // Expenses
+  const expenseSheet = XLSX.utils.json_to_sheet(expenses);
+  XLSX.utils.book_append_sheet(wb, expenseSheet, "Expenses");
+
+  // Inventory
+  const inventorySheet = XLSX.utils.json_to_sheet(inventory);
+  XLSX.utils.book_append_sheet(wb, inventorySheet, "Inventory");
+
+  // Save file
+  XLSX.writeFile(wb, "JKM_Backup.xlsx");
+
+  Swal.fire("Success", "Excel exported successfully", "success");
+}
+
+function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 10;
+
+  doc.setFontSize(16);
+  doc.text("JKM PRIME BUSINESS REPORT", 10, y);
+  y += 10;
+
+  // SALES SUMMARY
+  const sales = weeklyReports.reduce((a, b) => a + b.sales, 0);
+  const expensesTotal = expenses.reduce((a, b) => a + b.amount, 0);
+  const profit = sales - expensesTotal;
+
+  doc.setFontSize(12);
+  doc.text(`Total Sales: ₱${sales}`, 10, y += 10);
+  doc.text(`Total Expenses: ₱${expensesTotal}`, 10, y += 10);
+  doc.text(`Net Profit: ₱${profit}`, 10, y += 10);
+
+  y += 10;
+
+  // WEEKLY TABLE
+  doc.text("Weekly Reports", 10, y += 10);
+
+  doc.autoTable({
+    startY: y + 5,
+    head: [["Week", "Sales", "Expenses", "Profit"]],
+    body: weeklyReports.map(r => [
+      r.period,
+      r.sales,
+      r.expenses,
+      r.sales - r.expenses
+    ])
+  });
+
+  doc.save("JKM_Report.pdf");
+
+  Swal.fire("Success", "PDF exported successfully", "success");
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+
+  const now = new Date().toLocaleString();
+
+  const qDate = document.getElementById("qDate");
+  const qDateText = document.getElementById("qDateText");
+
+  if (qDate) qDate.value = now;
+  if (qDateText) qDateText.innerText = now;
+
+  updateReceiptHistory();
+  updateDashboard();
+  renderWeekly();
+  renderExpenses();
+  renderInventory();
+  loadWeeklyFromFirebase();
+loadExpensesFromFirebase();
+loadInventoryFromFirebase();
+loadReceiptsFromFirebase();
+
+});
+document.getElementById("menuToggle").addEventListener("click", function () {
+  document.getElementById("sidebar").classList.toggle("show");
+});
+document.querySelectorAll(".sidebar a").forEach(link => {
+  link.addEventListener("click", () => {
+    if (window.innerWidth <= 768) {
+      document.getElementById("sidebar").classList.remove("show");
+    }
+  });
+});
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://jkm-project-tracking-default-rtdb.firebaseio.com/",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function loadWeeklyFromFirebase() {
+  db.ref("weeklyReports").on("value", snapshot => {
+    weeklyReports = snapshot.val() || [];
+    renderWeekly();
+    updateDashboard();
+  });
+}
+
+function saveExpensesToFirebase() {
+  db.ref("expenses").set(expenses);
+}
+
+function loadExpensesFromFirebase() {
+  db.ref("expenses").on("value", snapshot => {
+    expenses = snapshot.val() || [];
+    renderExpenses();
+    updateDashboard();
+  });
+}
+
+function saveInventoryToFirebase() {
+  db.ref("inventory").set(inventory);
+}
+
+function loadInventoryFromFirebase() {
+  db.ref("inventory").on("value", snapshot => {
+    inventory = snapshot.val() || [];
+    renderInventory();
+    updateDashboard();
+  });
+}
+
+function saveReceiptsToFirebase(receipts) {
+  db.ref("receipts").set(receipts);
+}
+
+function loadReceiptsFromFirebase() {
+  db.ref("receipts").on("value", snapshot => {
+    localStorage.setItem("receipts", JSON.stringify(snapshot.val() || []));
+    updateReceiptHistory();
+    updateDashboard();
+  });
+}
+</script>
+
+</body>
+</html>
