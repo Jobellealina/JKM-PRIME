@@ -801,21 +801,26 @@ function logout(){
 NAVIGATION
 ======================= */
 
-document.querySelectorAll('.nav-link').forEach(link=>{
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', function (e) {
+    e.preventDefault();
 
-link.addEventListener('click',function(e){
+    const sectionId = this.dataset.section;
 
-e.preventDefault();
+    // ❗ IMPORTANT: ignore links na walang section (like tracking)
+    if (!sectionId) return;
 
-document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-this.classList.add('active');
+    document.querySelectorAll('.nav-link')
+      .forEach(l => l.classList.remove('active'));
 
-document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+    this.classList.add('active');
 
-document.getElementById(this.dataset.section).classList.add('active');
+    document.querySelectorAll('.section')
+      .forEach(sec => sec.classList.remove('active'));
 
-});
-
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.add('active');
+  });
 });
 
 
