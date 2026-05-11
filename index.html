@@ -129,8 +129,8 @@ body{
 }
 
 .main-content{
-  margin-left:260px;
-  padding:20px;
+  margin-left:220px;
+  padding:5px;
 }
 
 .card-box{
@@ -190,36 +190,93 @@ body{
   box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
 
-@media(max-width:768px){
-
-  .sidebar{
-    width:260px;
-    left:-260px;
-    z-index:999;
-    transition:.3s;
-  }
-
-  .sidebar.show{
-    left:0;
-  }
-
-  .main-content{
-    margin-left:0;
-  }
-
-  #menuToggle{
-    position:fixed;
-    top:10px;
-    left:10px;
-    z-index:1000;
-  }
-
-  .topbar{
-    margin-top:60px;
-  }
-
+.sidebar{
+  width:260px;
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  background:#0b1f4d;
+  color:#fff;
+  padding-top:20px;
+  transition:0.3s;
+  overflow-x:hidden;
+  z-index:999;
 }
 
+.sidebar.collapsed{
+  width:150px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align: left;
+}
+
+.sidebar .text-center img{
+  transition:0.3s;
+}
+
+.sidebar.collapsed .text-center img{
+  width:45px;
+  height:45px;
+}
+/* hide text kapag collapsed ONLY */
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed a span{
+  display:none;
+  text-align: left;
+}
+
+/* MAIN CONTENT */
+.main-content{
+  margin-left:275px;
+  transition:0.3s;
+    padding:5px;
+}
+
+.sidebar.collapsed ~ .main-content{
+  margin-left:130px; /* same sa collapsed width */
+  text-align: left;
+}
+
+/* =======================
+   MOBILE ONLY FIX
+======================= */
+@media(max-width:768px){
+
+  /* SIDEBAR */
+.sidebar{
+  width:260px;
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  background:#0b1f4d;
+  color:#fff;
+  padding-top:20px;
+  transition:0.3s;
+  overflow-x:hidden;
+  z-index:999;
+}
+
+/* center icons when collapsed */
+.sidebar.collapsed a{
+  text-align:center;
+  padding:12px 0;
+}
+
+/* MAIN CONTENT */
+.main-content{
+  margin-left:260px;
+  transition:0.3s;
+    padding:5px;
+}
+
+.sidebar.collapsed ~ .main-content{
+  margin-left:70px;
+    padding:5px;
+}
+}
 @media(min-width:769px){
   #menuToggle{
     display:none;
@@ -231,66 +288,92 @@ body{
 
 <body>
 
+<!-- MOBILE MENU BUTTON -->
 <button class="btn btn-dark d-md-none m-3" id="menuToggle">
-<i class="fa-solid fa-bars"></i>
+  <i class="fa-solid fa-bars"></i>
 </button>
 
+<!-- COLLAPSE BUTTON (ALWAYS FLOATING) -->
+<button class="btn btn-sm btn-light" id="collapseBtn">
+  <i class="fa-solid fa-bars"></i>
+</button>
+
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
 
-<div class="text-center mb-4">
-<img src="logo.png"
-width="80"
-class="rounded-circle shadow mb-2">
+  <!-- LOGO SECTION -->
+  <div class="text-center mb-4">
+    <img src="logo.png"
+      width="80"
+      class="rounded-circle shadow mb-2">
 
-<h4 class="fw-bold">JKM PRIME</h4>
-<small>DIGITAL PRINTS</small>
+    <h4 class="fw-bold brand-text">JKM PRIME</h4>
+    <small class="brand-text">DIGITAL PRINTS</small>
+  </div>
+
+  <!-- LINKS -->
+
+  <a href="#" class="nav-link active" data-section="dashboardSection">
+    <i class="fa-solid fa-gauge"></i>
+    <span>Dashboard</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="weeklySection">
+    <i class="fa-solid fa-calendar-week"></i>
+    <span>Weekly Report</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="expenseSection">
+    <i class="fa-solid fa-wallet"></i>
+    <span>Expense Log</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="inventorySection">
+    <i class="fa-solid fa-boxes-stacked"></i>
+    <span>Inventory</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="monthlySection">
+    <i class="fa-solid fa-chart-pie"></i>
+    <span>Monthly Summary</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="archiveSection">
+    <i class="fa-solid fa-box-archive"></i>
+    <span>Monthly Archive</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="receiptSection">
+    <i class="fa-solid fa-receipt"></i>
+    <span>Receipt</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="receiptHistorySection">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    <span>Receipt History</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="quotationSection">
+    <i class="fa-solid fa-file-invoice"></i>
+    <span>Quotation</span>
+  </a>
+
+  <a href="tracking.html">
+    <i class="fa-solid fa-file-invoice"></i>
+    <span>SRP Calculator</span>
+  </a>
+
+  <a href="#" class="nav-link" data-section="equipmentSection">
+    <i class="fa-solid fa-screwdriver-wrench"></i>
+    <span>Equipment & Materials</span>
+  </a>
+
+  <a href="#" onclick="logout()">
+    <i class="fa fa-right-from-bracket"></i>
+    <span>Logout</span>
+  </a>
+
 </div>
-
-<a href="#" class="nav-link active" data-section="dashboardSection">
-<i class="fa-solid fa-gauge"></i> Dashboard
-</a>
-
-<a href="#" class="nav-link" data-section="weeklySection">
-<i class="fa-solid fa-calendar-week"></i> Weekly Report
-</a>
-
-<a href="#" class="nav-link" data-section="expenseSection">
-<i class="fa-solid fa-wallet"></i> Expense Log
-</a>
-
-<a href="#" class="nav-link" data-section="inventorySection">
-<i class="fa-solid fa-boxes-stacked"></i> Inventory
-</a>
-
-<a href="#" class="nav-link" data-section="monthlySection">
-<i class="fa-solid fa-chart-pie"></i> Monthly Summary
-</a>
-<a href="#" class="nav-link" data-section="archiveSection">
-<i class="fa-solid fa-box-archive"></i> Monthly Archive
-</a>
-<a href="#" class="nav-link" data-section="receiptSection">
-<i class="fa-solid fa-receipt"></i> Receipt
-</a>
-
-<a href="#" class="nav-link" data-section="receiptHistorySection">
-<i class="fa-solid fa-clock-rotate-left"></i> Receipt History
-</a>
-
-<a href="#" class="nav-link" data-section="quotationSection">
-<i class="fa-solid fa-file-invoice"></i> Quotation
-</a>
-<a href="tracking.html" class="nav-link" onclick="window.location.href='tracking.html'">
-<i class="fa-solid fa-file-invoice"></i> SRP Calculator
-</a>
-<a href="#" class="nav-link" data-section="equipmentSection">
-<i class="fa-solid fa-screwdriver-wrench"></i> Equipment & Materials
-</a>
-<a href="#" onclick="logout()">
-<i class="fa fa-right-from-bracket"></i> Logout
-</a>
-
-</div>
-
 <div class="main-content" >
 
 <div class="topbar d-flex justify-content-between align-items-center"  style="background-color: #4672d7; color: white;">
@@ -443,6 +526,22 @@ class="rounded-circle shadow mb-2">
     </div>
   </div>
 
+  <div class="card shadow-sm p-3 mt-4" style="width: 98%; margin-left: 10px;">
+  <h5 style="font-weight:1000; color: #0b1f4d;">Audit Log</h5>
+
+  <div style="max-height:300px; overflow-y:auto;">
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>IP Address</th>
+          <th>User Action</th>
+        </tr>
+      </thead>
+      <tbody id="auditLogTable"></tbody>
+    </table>
+  </div>
+</div>
 </div>
 </div>
 
@@ -481,7 +580,10 @@ class="rounded-circle shadow mb-2">
     </div>
   </div>
 
+  
 </div>
+
+
 <!-- WEEKLY -->
 
 <div id="weeklySection" class="section">
@@ -1274,7 +1376,9 @@ window.addEventListener("load", ()=>{
 });
 function logout(){
     localStorage.removeItem("loggedIn");
+    addAuditLog("User logged out");
     window.location.href = "login.html";
+    
 }
 
 /* =======================
@@ -1397,7 +1501,8 @@ function addExpense() {
   if (!expense.date || !expense.desc)
     return Swal.fire("Error", "Complete fields", "error");
 
-  db.ref("expenses").push(expense);
+db.ref("expenses").push(expense);
+addAuditLog("Added expense", expense.desc);
 
   expenseDate.value = "";
   expenseDesc.value = "";
@@ -1485,6 +1590,7 @@ function addInventory() {
   if (!item.name) return Swal.fire("Error", "Enter item name", "error");
 
   db.ref("inventory").push(item);
+addAuditLog("Added inventory", item.name);
 
   itemName.value = "";
   itemQty.value = "";
@@ -1554,6 +1660,7 @@ function saveInventory() {
   const itemId = inventory[inventoryEditIndex].id;
 
   db.ref("inventory/" + itemId).update(item);
+addAuditLog("Updated inventory", item.name);
 
   bootstrap.Modal.getInstance(
     document.getElementById('inventoryModal')
@@ -1576,6 +1683,7 @@ confirmButtonText:'Delete'
 if(result.isConfirmed){
 
 db.ref("inventory/" + id).remove();
+addAuditLog("Deleted inventory", id);
 
 Swal.fire('Deleted!','','success');
 
@@ -1995,6 +2103,7 @@ function deleteReceipt(id) {
   }).then((result) => {
     if (result.isConfirmed) {
       db.ref("receipts/" + id).remove();
+      addAuditLog("Deleted receipt: " + id);
       Swal.fire("Deleted!", "", "success");
     }
   });
@@ -2173,7 +2282,7 @@ renderRecentTransactions();
 loadEquipmentFromFirebase();
 loadArchivesFromFirebase();
 seedDefaultArchives();
-
+loadAuditLogs();
 
 });
 document.getElementById("menuToggle").addEventListener("click", function () {
@@ -2600,6 +2709,7 @@ function addEquipment() {
     return Swal.fire("Error", "Complete fields", "error");
 
   db.ref("equipment").push(item);
+addAuditLog("Added equipment", item.name);
 
   eqName.value = "";
   eqAmount.value = "";
@@ -2643,6 +2753,7 @@ function deleteEquipment(id) {
 
     if (result.isConfirmed) {
       db.ref("equipment/" + id).remove();
+addAuditLog("Deleted equipment", id);
       Swal.fire("Deleted!", "", "success");
     }
 
@@ -2694,6 +2805,83 @@ function updateEquipmentSummary() {
 }
 let equipment = [];
 let equipmentEditId = null;
+
+document.getElementById("collapseBtn").addEventListener("click", () => {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+});
+
+let auditLogs = [];
+
+async function getIP() {
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const data = await res.json();
+    return data.ip || "Unknown IP";
+  } catch (e) {
+    console.log("IP fetch failed:", e);
+    return "IP not available";
+  }
+}
+async function addAuditLog(action, details = "") {
+
+  let ip = "Unknown IP";
+
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const data = await res.json();
+    ip = data.ip;
+  } catch (e) {
+    console.log("IP fetch failed:", e);
+  }
+
+  const log = {
+    time: new Date().toLocaleString(),
+    ip,
+    action,
+    details
+  };
+
+  try {
+    await db.ref("auditLogs").push(log);
+    renderAuditLogs(); 
+    console.log("AUDIT SAVED:", log);
+  } catch (err) {
+    console.log("Firebase audit error:", err);
+  }
+}
+function loadAuditLogs() {
+
+  db.ref("auditLogs").on("value", snap => {
+
+    const data = snap.val();
+
+    auditLogs = data
+      ? Object.entries(data).map(([id, v]) => ({ id, ...v }))
+      : [];
+
+    renderAuditLogs(); // 🔥 update UI every change
+  });
+}
+function renderAuditLogs() {
+
+  const table = document.getElementById("auditLogTable");
+  table.innerHTML = "";
+
+  auditLogs
+    .slice()
+    .reverse()
+    .slice(0, 50)
+    .forEach(log => {
+
+      table.innerHTML += `
+        <tr>
+          <td>${log.time}</td>
+          <td>${log.ip}</td>
+          <td>${log.action} ${log.details ? "- " + log.details : ""}</td>
+        </tr>
+      `;
+    });
+}
 </script>
 
 </body>
