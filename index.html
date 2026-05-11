@@ -1915,7 +1915,7 @@ function renderArchives() {
 
   archives.reverse().forEach(a => {
 
-    const profitEach = (Number(a.profit || 0) / 3).toFixed(2);
+    const profitEach = (Number(a.profit || 0) / 3.33).toFixed(2);
 
     table.innerHTML += `
       <tr>
