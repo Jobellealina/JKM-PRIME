@@ -265,6 +265,9 @@ class="rounded-circle shadow mb-2">
 <a href="#" class="nav-link" data-section="monthlySection">
 <i class="fa-solid fa-chart-pie"></i> Monthly Summary
 </a>
+<a href="#" class="nav-link" data-section="archiveSection">
+<i class="fa-solid fa-box-archive"></i> Monthly Archive
+</a>
 <a href="#" class="nav-link" data-section="receiptSection">
 <i class="fa-solid fa-receipt"></i> Receipt
 </a>
@@ -288,11 +291,11 @@ class="rounded-circle shadow mb-2">
 
 </div>
 
-<div class="main-content">
+<div class="main-content" >
 
-<div class="topbar d-flex justify-content-between align-items-center">
+<div class="topbar d-flex justify-content-between align-items-center"  style="background-color: #4672d7; color: white;">
 <div>
-<h4 class="mb-0" style="font-weight: 1000; color: navy;">JKM Prime Digital Prints</h4>
+<h4 class="mb-0" style="font-weight: 1000; ">JKM Prime Digital Prints</h4>
 <small>Printing Business</small>
 </div>
 
@@ -443,7 +446,42 @@ class="rounded-circle shadow mb-2">
 </div>
 </div>
 
+<!-- MONTHLY ARCHIVE -->
+<div id="archiveSection" class="section">
 
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body">
+
+      <h4 class="fw-bold mb-3">
+        Monthly Archive
+      </h4>
+
+      <div class="table-responsive">
+
+<table class="table table-bordered">
+
+<thead>
+  <tr>
+    <th>Month</th>
+    <th>Year</th>
+    <th>Total Sales</th>
+    <th>Total Expenses</th>
+    <th>Total Profit</th>
+    <th>Profit Each</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+
+          <tbody id="archiveTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
 <!-- WEEKLY -->
 
 <div id="weeklySection" class="section">
@@ -1741,11 +1779,137 @@ let weeklyReports = [];
 let expenses = [];
 let inventory = [];
 let receipts = []; // 🔥 ADD THIS
-
+let archives = [];
 
 
 let quotationItems = [];
 
+function loadArchivesFromFirebase() {
+
+  db.ref("monthlyArchive").on("value", snap => {
+
+    const data = snap.val();
+
+    archives = data
+      ? Object.entries(data).map(([id, v]) => ({ id, ...v }))
+      : [];
+
+    renderArchives();
+
+  });
+
+}
+function renderArchives() {
+
+  const table = document.getElementById("archiveTable");
+
+  table.innerHTML = "";
+
+  archives.reverse().forEach(a => {
+
+    const profitEach = (Number(a.profit || 0) / 3).toFixed(2);
+
+    table.innerHTML += `
+      <tr>
+        <td>${a.monthName}</td>
+        <td>${a.year}</td>
+        <td>₱${a.sales}</td>
+        <td>₱${a.expenses}</td>
+        <td>₱${a.profit}</td>
+        <td>₱${profitEach}</td>
+        <td>
+
+
+
+          <button class="btn btn-danger btn-sm"
+            onclick="deleteArchive('${a.id}')">
+            Delete
+          </button>
+
+        </td>
+      </tr>
+    `;
+
+  });
+
+}
+function viewArchive(id) {
+
+  const a = archives.find(x => x.id === id);
+
+  if (!a) return;
+
+  let html = `
+    <div style="text-align:left">
+
+    <h5>${a.monthName} ${a.year}</h5>
+
+    <hr>
+
+    <p><b>Total Sales:</b> ₱${a.sales}</p>
+    <p><b>Total Expenses:</b> ₱${a.expenses}</p>
+    <p><b>Total Profit:</b> ₱${a.profit}</p>
+
+    <hr>
+
+    <h6>Weekly Reports:</h6>
+  `;
+
+  a.weeklyReports.forEach(w => {
+
+    html += `
+      <div>
+        ${w.period} —
+        Sales: ₱${w.sales},
+        Expenses: ₱${w.expenses}
+      </div>
+    `;
+
+  });
+
+  html += `<hr><h6>Expenses:</h6>`;
+
+  a.expenses.forEach(e => {
+
+    html += `
+      <div>
+        ${e.date} —
+        ${e.desc} —
+        ₱${e.amount}
+      </div>
+    `;
+
+  });
+
+  html += `</div>`;
+
+  Swal.fire({
+    title: "Archive Details",
+    html,
+    width: 800
+  });
+
+}
+function deleteArchive(id) {
+
+  Swal.fire({
+    title: "Delete archive?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete"
+  }).then(result => {
+
+    if (result.isConfirmed) {
+
+      db.ref("monthlyArchive/" + id).remove();
+
+      Swal.fire("Deleted!", "", "success");
+
+    }
+
+  });
+
+}
 function addQuotationItem() {
   const item = document.getElementById("qItem").value.trim();
   const qty = Number(document.getElementById("qQty").value);
@@ -2007,6 +2171,9 @@ checkMonthChange();
 renderDashboardChart();
 renderRecentTransactions();
 loadEquipmentFromFirebase();
+loadArchivesFromFirebase();
+seedDefaultArchives();
+
 
 });
 document.getElementById("menuToggle").addEventListener("click", function () {
@@ -2227,47 +2394,152 @@ function updateMonthlySummary(){
     "₱" + yearShare.toFixed(2);
 }
 
+// =======================
+// DEFAULT MONTHLY ARCHIVES
+// =======================
+
+function seedDefaultArchives() {
+
+  db.ref("monthlyArchive").once("value", snap => {
+
+    const data = snap.val();
+
+    // if may laman na, wag na mag-seed
+    if (data) return;
+
+    const defaultArchives = [
+
+      {
+        month: 2,
+        monthName: "March",
+        year: 2026,
+        sales: 23860,
+        expenses: 13123,
+        profit: 10737,
+        eachShare: 3006
+      },
+
+      {
+        month: 3,
+        monthName: "April",
+        year: 2026,
+        sales: 26118,
+        expenses: 14365,
+        profit: 11753,
+        eachShare: 3056
+      }
+
+    ];
+
+    defaultArchives.forEach(a => {
+      db.ref("monthlyArchive").push(a);
+    });
+
+    console.log("Default archives added");
+
+  });
+
+}
+
 function checkMonthChange() {
+
   const now = new Date();
+
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  if (currentMonth !== lastMonth || currentYear !== lastYear) {
+  if (
+    currentMonth !== lastMonth ||
+    currentYear !== lastYear
+  ) {
 
-    // 🔥 SAVE CURRENT MONTH SUMMARY (optional)
+    const sales =
+      weeklyReports.reduce(
+        (a,b)=>a + Number(b.sales || 0),
+        0
+      ) +
+      receipts.reduce((a,r)=>{
+
+        const total =
+          (r.items || []).reduce(
+            (s,i)=>s + Number(i.total || 0),
+            0
+          );
+
+        return a + total;
+
+      },0);
+
+    const expensesTotal =
+      weeklyReports.reduce(
+        (a,b)=>a + Number(b.expenses || 0),
+        0
+      ) +
+      expenses.reduce(
+        (a,b)=>a + Number(b.amount || 0),
+        0
+      );
+
+    const profit = sales - expensesTotal;
+
+    const monthNames = [
+      "January","February","March",
+      "April","May","June",
+      "July","August","September",
+      "October","November","December"
+    ];
+
+    // SAVE TO ARCHIVE
     db.ref("monthlyArchive").push({
+
       month: lastMonth,
+      monthName: monthNames[lastMonth],
       year: lastYear,
-      timestamp: new Date().toISOString(),
-      data: {
-        weeklyReports,
-        expenses,
-        receipts
-      }
+
+      sales,
+      expenses: expensesTotal,
+      profit,
+
+      weeklyReports,
+      expenses,
+      receipts,
+      inventory,
+
+      createdAt: new Date().toISOString()
+
     });
 
-    // 🔥 RESET DATA FOR NEW MONTH
-    weeklyReports = [];
-    expenses = [];
-    receipts = [];
-
-    // OPTIONAL: clear Firebase current data
+    // RESET CURRENT MONTH
     db.ref("weeklyReports").remove();
     db.ref("expenses").remove();
     db.ref("receipts").remove();
 
-    // update tracker
+    // OPTIONAL:
+    // KEEP INVENTORY
+    // OR RESET INVENTORY TOO
+
+    // db.ref("inventory").remove();
+
+    weeklyReports = [];
+    expenses = [];
+    receipts = [];
+
     lastMonth = currentMonth;
     lastYear = currentYear;
 
-    // refresh UI
     updateDashboard();
     updateMonthlySummary();
     renderDashboardChart();
-renderRecentTransactions();
+    renderRecentTransactions();
 
-    Swal.fire("New Month Started", "Monthly data reset completed", "success");
+    Swal.fire({
+      icon: "success",
+      title: "New Month Started",
+      text: "Previous month archived successfully"
+    });
+
   }
+
 }
 let dashboardChart;
 
